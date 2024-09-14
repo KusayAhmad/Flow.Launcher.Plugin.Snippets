@@ -2,7 +2,7 @@
 
 namespace Flow.Launcher.Plugin.Snippets;
 
-public class Settings
+public class Settings : BaseModel
 {
     public Dictionary<string, string> Snippets { get; set; } = new();
 }
