@@ -14,5 +14,10 @@
     <system:String x:Key="snippets_plugin_delete_snippet">Delete Snippet</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet_info">Delete Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_open_settings">Open Settings</system:String>
+    <system:String x:Key="snippets_plugin_close">Close</system:String>
+    <system:String x:Key="snippets_plugin_save">Save</system:String>
+    <system:String x:Key="snippets_plugin_edit_item_key">Current Is Edit Mode, click to switch to Add Mode</system:String>
+    <system:String x:Key="snippets_plugin_add_item_key">Current Is Add Mode</system:String>
+    <system:String x:Key="snippets_plugin_manage_snippets">Manage Snippets</system:String>
 
 </ResourceDictionary>

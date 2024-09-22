@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -72,7 +71,11 @@ namespace Flow.Launcher.Plugin.Snippets
         private Result _appendSnippets(Query query, string[] searchTerms)
         {
             var name = searchTerms[0];
-            var value = searchTerms[1];
+            var values = new List<string>();
+            for (var i = 1; i < searchTerms.Length; i++)
+                values.Add(searchTerms[i]);
+            // value join with space
+            var value = string.Join(" ", values);
             return new Result
             {
                 Title = _context.API.GetTranslation("snippets_plugin_add"),
@@ -110,8 +113,12 @@ namespace Flow.Launcher.Plugin.Snippets
                     {
                         var fw = new FormWindows(_context.API, _settings, kvp)
                         {
+                            Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
                             WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                            Topmost = true
+                            Topmost = true,
+                            WindowState = WindowState.Normal,
+                            ResizeMode = ResizeMode.NoResize,
+                            ShowInTaskbar = false
                         };
                         fw.ShowDialog();
                         return true;

@@ -14,5 +14,10 @@
     <system:String x:Key="snippets_plugin_delete_snippet">删除 Snippet</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet_info">删除 Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_open_settings">打开设置</system:String>
-
+    <system:String x:Key="snippets_plugin_close">关闭</system:String>
+    <system:String x:Key="snippets_plugin_save">保存</system:String>
+    <system:String x:Key="snippets_plugin_edit_item_key">当前为编辑模式, 点击切换为添加模式</system:String>
+    <system:String x:Key="snippets_plugin_add_item_key">当前为添加模式</system:String>
+    <system:String x:Key="snippets_plugin_manage_snippets">管理 Snippets</system:String>
+    
 </ResourceDictionary>
