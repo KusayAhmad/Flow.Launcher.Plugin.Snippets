@@ -3,83 +3,195 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:Flow.Launcher.Plugin.Snippets"
         mc:Ignorable="d"
-        Width="1080"
-        Height="540"
-        Title="FormWindows">
+        Title="{DynamicResource snippets_plugin_manage_snippets}"
+        Width="980"
+        Height="640"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource PopuBGColor}"
+        Foreground="{DynamicResource PopupTextColor}">
 
-    <StackPanel Orientation="Horizontal">
-        <DockPanel>
-            <Grid Width="580">
+    <!-- Background & Foreground Set Sync Flow Launcher -->
 
-                <DataGrid
-                    x:Name="DataGrid"
-                    IsReadOnly="True"
-                    CanUserAddRows="False"
-                    CanUserResizeColumns="False"
-                    CanUserSortColumns="False"
-                    AutoGenerateColumns="False"
-                    HeadersVisibility="Column"
-                    GridLinesVisibility="None"
-                    SelectionMode="Single"
-                    SelectionChanged="DataGrid_OnSelectionChanged"
-                    ItemsSource="{Binding KeyValuePairs}">
+    <!-- Remove Windows Default Title Bar -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="32"
+                      ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}" />
+    </WindowChrome.WindowChrome>
 
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="1*">
-                            <DataGridTemplateColumn.Header>
-                                <TextBlock Text="Key" HorizontalAlignment="Center" />
-                            </DataGridTemplateColumn.Header>
+    <StackPanel Orientation="Vertical">
 
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Key}" VerticalAlignment="Center" Margin="5 0 0 0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+        <!-- Custom Title Bar -->
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    Grid.Column="4"
+                    Click="OnCancelButtonClick"
+                    Style="{StaticResource TitleBarCloseButtonStyle}">
+                    <Path
+                        Width="46"
+                        Height="32"
+                        Data="M 18,11 27,20 M 18,20 27,11"
+                        Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                        StrokeThickness="1">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Style.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding Path=IsActive, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                        Value="False">
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </Button>
+            </Grid>
+        </StackPanel>
 
-                        <DataGridTemplateColumn Width="2*">
-                            <DataGridTemplateColumn.Header>
-                                <TextBlock Text="Value" HorizontalAlignment="Center" />
-                            </DataGridTemplateColumn.Header>
+        <!-- Content Layout -->
+        <DockPanel Margin="26,0,26,0">
+            <!-- Custom Title -->
+            <StackPanel Margin="0,0,0,12" DockPanel.Dock="Top">
+                <TextBlock
+                    Margin="0,0,0,0"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Text="{DynamicResource snippets_plugin_manage_snippets}"
+                    TextAlignment="Left" />
+            </StackPanel>
 
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Value}" VerticalAlignment="Center" Margin="5 0 0 0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
+            <!-- Content Layout -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
 
-                </DataGrid>
+                <!-- Left Snippets List-->
+
+
+                <DockPanel>
+
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="88" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="64" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0">
+                            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Center" Name="ComboBoxFilterType">
+                                <ComboBoxItem Content="{DynamicResource snippets_plugin_snippets_key}"></ComboBoxItem>
+                                <ComboBoxItem Content="{DynamicResource snippets_plugin_snippets_value}"></ComboBoxItem>
+                            </ComboBox>
+                        </Border>
+
+                        <TextBox Grid.Column="1" x:Name="TbFilter" KeyDown="OnTbFilter_KeyDown"></TextBox>
+
+                        <Border Grid.Column="2">
+                            <Button Content="{DynamicResource snippets_plugin_filter}"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Click="ButtonFilter_OnClick">
+                            </Button>
+                        </Border>
+                        <Border Grid.Column="3">
+                            <Button Content="{DynamicResource snippets_plugin_reset}"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center" Click="ButtonReset_OnClick">
+                            </Button>
+                        </Border>
+                    </Grid>
+
+                    <DataGrid
+                        x:Name="DataGrid"
+                        Height="480"
+                        VerticalScrollBarVisibility="Visible"
+                        IsReadOnly="True"
+                        CanUserAddRows="False"
+                        CanUserResizeColumns="False"
+                        CanUserSortColumns="False"
+                        AutoGenerateColumns="False"
+                        HeadersVisibility="Column"
+                        GridLinesVisibility="All"
+                        SelectionMode="Single"
+                        SelectionChanged="DataGrid_OnSelectionChanged"
+                        ItemsSource="{Binding KeyValuePairs}">
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="1*">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="{DynamicResource snippets_plugin_snippets_key}"
+                                               HorizontalAlignment="Center" />
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Key}" VerticalAlignment="Center"
+                                                   Margin="5 0 0 0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Width="2*">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="{DynamicResource snippets_plugin_snippets_value}"
+                                               HorizontalAlignment="Center" />
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Value}" VerticalAlignment="Center"
+                                                   MaxHeight="64" Margin="5 0 0 0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+
+                <!-- Right Add Or Edit Panel-->
+                <DockPanel Grid.Column="1">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+                        <StackPanel Orientation="Vertical" Margin="5">
+                            <Label Content="{DynamicResource snippets_plugin_snippets_key}"></Label>
+                            <TextBox x:Name="TbKey" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Vertical" Margin="5">
+                            <Label Content="{DynamicResource snippets_plugin_snippets_value}"></Label>
+                            <TextBox x:Name="TbValue" Height="360" AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto">
+                            </TextBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="BtnClose" Margin="5" Click="ButtonCancel_OnClick" />
+                            <Button x:Name="BtnSave" Margin="5" Click="ButtonSave_OnClick" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick" />
+                        </StackPanel>
+
+                    </StackPanel>
+                </DockPanel>
 
             </Grid>
         </DockPanel>
-        <DockPanel Width="500">
-            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
 
-                <StackPanel Orientation="Vertical" Margin="5">
-                    <Label>Key:</Label>
-                    <TextBox x:Name="TbKey"></TextBox>
-                </StackPanel>
 
-                <StackPanel Orientation="Vertical" Margin="5">
-                    <Label>Value:</Label>
-                    <TextBox x:Name="TbValue"></TextBox>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="BtnClose" Margin="5" Click="ButtonCancel_OnClick"></Button>
-                    <Button x:Name="BtnSave" Margin="5" Click="ButtonSave_OnClick"></Button>
-                </StackPanel>
-
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                    <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick"></Button>
-                </StackPanel>
-
-            </StackPanel>
-        </DockPanel>
     </StackPanel>
 
 </Window>

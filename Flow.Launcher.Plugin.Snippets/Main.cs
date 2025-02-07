@@ -20,62 +20,97 @@ namespace Flow.Launcher.Plugin.Snippets
 
         public List<Result> Query(Query query)
         {
+            var search = query.Search;
+
+            if (!_settings.Snippets.Any())
+                return _buildEmpty(query);
+
+            // all data
+            if (string.IsNullOrEmpty(search))
+            {
+                return _settings.Snippets.Select(r => _toResult(query, r))
+                    .ToList();
+            }
+
+            // full match
+            var fullMatch = _settings.Snippets.ContainsKey(search);
+            if (fullMatch)
+            {
+                var value = _settings.Snippets[search];
+                return new List<Result>
+                {
+                    _toResult(query, new KeyValuePair<string, string>(search, value))
+                };
+            }
+
+            // fuzzy search
             var searchTerms = query.SearchTerms;
-            string searchKey = null;
-            var searchTermsLength = searchTerms.Length;
-            if (searchTermsLength > 0)
-                searchKey = searchTerms[0];
+            if (searchTerms.Length < 2)
+            {
+                // only first 
+                return _settings.Snippets
+                    .Where(r =>
+                    {
+                        if (string.IsNullOrEmpty(search)) return true;
+                        var mr = _context.API.FuzzySearch(search, r.Key);
+                        return mr.Success;
+                    })
+                    .Select(r => _toResult(query, r))
+                    .ToList();
+            }
+
+            // eq 2
+            var firstSearchKey = query.FirstSearch;
+            if (_settings.Snippets.TryGetValue(firstSearchKey, out var firstValue))
+            {
+                // update
+                return new List<Result>
+                {
+                    _updateSnippets(query, firstSearchKey, query.SecondToEndSearch)
+                };
+            }
 
             var results = _settings.Snippets
                 .Where(r =>
                 {
-                    if (string.IsNullOrEmpty(searchKey)) return true;
-                    var mr = _context.API.FuzzySearch(searchKey, r.Key);
+                    if (string.IsNullOrEmpty(firstSearchKey)) return true;
+                    var mr = _context.API.FuzzySearch(firstSearchKey, r.Key);
                     return mr.Success;
                 })
-                .Select(r =>
-                {
-                    return new Result
-                    {
-                        Title = r.Key,
-                        SubTitle = r.Value,
-                        IcoPath = IconPath,
-                        AutoCompleteText = $"{query.ActionKeyword} {r.Key}",
-                        ContextData = r,
-                        Preview = new Result.PreviewInfo
-                        {
-                            Description = r.Value,
-                            PreviewImagePath = IconPath
-                        },
-                        Action = _ =>
-                        {
-                            _context.API.CopyToClipboard(r.Value, showDefaultNotification: false);
-                            return true;
-                        }
-                    };
-                })
+                .Select(r => _toResult(query, r))
                 .ToList();
+            results.Add(_appendSnippets(query));
+            return results;
+        }
 
-            if (results.Any())
-                return results;
-            if (searchTermsLength < 2)
-                return results;
-
-            return new List<Result>
+        private Result _toResult(Query query, KeyValuePair<string, string> r)
+        {
+            return new Result
             {
-                _appendSnippets(query, searchTerms)
+                Title = r.Key,
+                SubTitle = r.Value,
+                IcoPath = IconPath,
+                AutoCompleteText = $"{query.ActionKeyword} {r.Key}",
+                ContextData = r,
+                Preview = new Result.PreviewInfo
+                {
+                    Description = r.Value,
+                    PreviewImagePath = IconPath
+                },
+                Action = _ =>
+                {
+                    _context.API.CopyToClipboard(r.Value, showDefaultNotification: false);
+                    return true;
+                }
             };
         }
 
 
-        private Result _appendSnippets(Query query, string[] searchTerms)
+        private Result _appendSnippets(Query query)
         {
-            var name = searchTerms[0];
-            var values = new List<string>();
-            for (var i = 1; i < searchTerms.Length; i++)
-                values.Add(searchTerms[i]);
-            // value join with space
-            var value = string.Join(" ", values);
+            var name = query.FirstSearch;
+            var value = query.SecondToEndSearch;
+
             return new Result
             {
                 Title = _context.API.GetTranslation("snippets_plugin_add"),
@@ -90,12 +125,33 @@ namespace Flow.Launcher.Plugin.Snippets
             };
         }
 
+        private Result _updateSnippets(Query query, string name, string value)
+        {
+            return new Result
+            {
+                Title = _context.API.GetTranslation("snippets_plugin_update"),
+                SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_update_info"), name, value),
+                IcoPath = IconPath,
+                Action = c =>
+                {
+                    _update(name, value);
+                    _context.API.ChangeQuery($"{query.ActionKeyword} {name}", true);
+                    return false;
+                }
+            };
+        }
+
         private void _add(string name, string value)
         {
             _settings.Snippets.Add(name, value);
             _context.API.SavePluginSettings();
         }
 
+        private void _update(string name, string value)
+        {
+            _settings.Snippets[name] = value;
+            _context.API.SavePluginSettings();
+        }
 
         public List<Result> LoadContextMenus(Result selectedResult)
         {
@@ -113,12 +169,12 @@ namespace Flow.Launcher.Plugin.Snippets
                     {
                         var fw = new FormWindows(_context.API, _settings, kvp)
                         {
-                            Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
-                            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                            // Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
+                            // WindowStartupLocation = WindowStartupLocation.CenterScreen,
                             Topmost = true,
-                            WindowState = WindowState.Normal,
-                            ResizeMode = ResizeMode.NoResize,
-                            ShowInTaskbar = false
+                            // WindowState = WindowState.Normal,
+                            // ResizeMode = ResizeMode.NoResize,
+                            // ShowInTaskbar = false
                         };
                         fw.ShowDialog();
                         return true;
@@ -135,7 +191,7 @@ namespace Flow.Launcher.Plugin.Snippets
                         _settings.Snippets.Remove(kvp.Key);
                         _context.API.SavePluginSettings();
                         return true;
-                    }
+                    },
                 });
             }
 
@@ -156,6 +212,20 @@ namespace Flow.Launcher.Plugin.Snippets
         public Control CreateSettingPanel()
         {
             return new SettingPanel(_context.API, _settings);
+        }
+
+        private List<Result> _buildEmpty(Query query)
+        {
+            return new List<Result>
+            {
+                new()
+                {
+                    Title = _context.API.GetTranslation("snippets_plugin_snippets_empty"),
+                    SubTitle = _context.API.GetTranslation("snippets_plugin_snippets_empty_add"),
+                    IcoPath = IconPath,
+                    AutoCompleteText = $"{query.ActionKeyword} "
+                }
+            };
         }
     }
 }

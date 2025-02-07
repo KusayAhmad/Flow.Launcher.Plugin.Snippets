@@ -9,7 +9,9 @@
 
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal" Margin="10">
-            <Button Click="ButtonOpenManage_OnClick">Snippets Manage</Button>
+            <Button Click="ButtonOpenManage_OnClick"
+                    Content="{DynamicResource snippets_plugin_manage_snippets}">
+            </Button>
         </StackPanel>
     </StackPanel>
 

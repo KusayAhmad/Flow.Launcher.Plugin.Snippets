@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Flow.Launcher.Plugin.Snippets;
@@ -11,6 +14,8 @@ public partial class FormWindows : Window
     private IPublicAPI _publicAPI;
     private Settings _settings;
     private int _editIndex = -1;
+
+    private ICollectionView _collectionView;
 
     public ObservableCollection<KeyValuePair<string, string>> KeyValuePairs { get; set; }
 
@@ -23,6 +28,8 @@ public partial class FormWindows : Window
         KeyValuePairs = new ObservableCollection<KeyValuePair<string, string>>(_settings.Snippets);
         _editIndex = FindEditIndex(selectKvp);
 
+        _collectionView = CollectionViewSource.GetDefaultView(KeyValuePairs);
+
         InitializeComponent();
 
         PreviewKeyDown += (sender, e) =>
@@ -33,9 +40,11 @@ public partial class FormWindows : Window
             }
         };
 
+
         BtnClose.Content = _publicAPI.GetTranslation("snippets_plugin_close");
         BtnSave.Content = _publicAPI.GetTranslation("snippets_plugin_save");
 
+        ComboBoxFilterType.SelectedIndex = 0; // default key
         _renderSelect();
         DataContext = this;
         if (_editIndex != -1)
@@ -117,6 +126,10 @@ public partial class FormWindows : Window
         Close();
     }
 
+    private void OnCancelButtonClick(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
 
     private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
     {
@@ -183,5 +196,75 @@ public partial class FormWindows : Window
         _editIndex = -1;
         _renderSelect();
         DataGrid.UnselectAll();
+    }
+
+
+    private void ButtonReset_OnClick(object sender, RoutedEventArgs e)
+    {
+        _editIndex = -1;
+        _renderSelect();
+        DataGrid.UnselectAll();
+
+        ComboBoxFilterType.SelectedIndex = 0;
+        TbFilter.Text = "";
+
+        _collectionView.Filter = _ => true;
+    }
+
+    private void ButtonFilter_OnClick(object sender, RoutedEventArgs e)
+    {
+        _editIndex = -1;
+        _renderSelect();
+        DataGrid.UnselectAll();
+
+        _DoFilter();
+    }
+
+    private void OnTbFilter_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            _DoFilter();
+        }
+    }
+
+    private void _DoFilter()
+    {
+        var filter = TbFilter.Text.Trim();
+
+        if (string.IsNullOrEmpty(filter))
+        {
+            _collectionView.Filter = _ => true;
+        }
+        else
+        {
+            if (ComboBoxFilterType.SelectedIndex == 1)
+            {
+                _collectionView.Filter = item =>
+                {
+                    if (item is KeyValuePair<string, string> kvp)
+                    {
+                        return kvp.Value.Contains(filter);
+                    }
+
+                    return false;
+                };
+            }
+            else
+            {
+                // filter key
+                _collectionView.Filter = item =>
+                {
+                    if (item is KeyValuePair<string, string> kvp)
+                    {
+                        return kvp.Key.Contains(filter);
+                    }
+
+                    return false;
+                };
+            }
+        }
+
+        _collectionView.Refresh();
     }
 }

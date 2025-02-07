@@ -19,12 +19,12 @@ public partial class SettingPanel : UserControl
     {
         var fw = new FormWindows(_publicApi, _settings)
         {
-            Title = _publicApi.GetTranslation("snippets_plugin_manage_snippets"),
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            // Title = _publicApi.GetTranslation("snippets_plugin_manage_snippets"),
+            // WindowStartupLocation = WindowStartupLocation.CenterScreen,
             Topmost = true,
-            WindowState = WindowState.Normal,
-            ResizeMode = ResizeMode.NoResize,
-            ShowInTaskbar = false
+            // WindowState = WindowState.Normal,
+            // ResizeMode = ResizeMode.NoResize,
+            // ShowInTaskbar = false
         };
         fw.ShowDialog();
     }

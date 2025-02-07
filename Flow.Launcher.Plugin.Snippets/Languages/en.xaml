@@ -7,8 +7,12 @@
     <system:String x:Key="snippets_plugin_title">Snippets</system:String>
     <system:String x:Key="snippets_plugin_description">Manage name/value snippets and copy to clipboard</system:String>
 
+    <system:String x:Key="snippets_plugin_snippets_empty">Snippets list is empty</system:String>
+    <system:String x:Key="snippets_plugin_snippets_empty_add">Snippet is empty, Please add Snippet first</system:String>
     <system:String x:Key="snippets_plugin_add">Add Snippet</system:String>
     <system:String x:Key="snippets_plugin_add_info">Add Snippet. {0} = {1}</system:String>
+    <system:String x:Key="snippets_plugin_update">Update Snippet</system:String>
+    <system:String x:Key="snippets_plugin_update_info">Update Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_edit_snippet">Edit Snippet</system:String>
     <system:String x:Key="snippets_plugin_edit_snippet_info">Edit Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet">Delete Snippet</system:String>
@@ -19,5 +23,9 @@
     <system:String x:Key="snippets_plugin_edit_item_key">Current Is Edit Mode, click to switch to Add Mode</system:String>
     <system:String x:Key="snippets_plugin_add_item_key">Current Is Add Mode</system:String>
     <system:String x:Key="snippets_plugin_manage_snippets">Manage Snippets</system:String>
+    <system:String x:Key="snippets_plugin_snippets_key">Key</system:String>
+    <system:String x:Key="snippets_plugin_snippets_value">Value</system:String>
+    <system:String x:Key="snippets_plugin_filter">Filter</system:String>
+    <system:String x:Key="snippets_plugin_reset">Reset</system:String>
 
 </ResourceDictionary>
