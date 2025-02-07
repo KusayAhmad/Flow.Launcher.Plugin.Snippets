@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace Flow.Launcher.Plugin.Snippets
@@ -16,14 +15,18 @@ namespace Flow.Launcher.Plugin.Snippets
         {
             _context = context;
             _settings = _context.API.LoadSettingJsonStorage<Settings>();
+
+            // InnerLogger.SetAsFlowLauncherLogger(context.API, LoggerLevel.TRACE);
         }
 
         public List<Result> Query(Query query)
         {
             var search = query.Search;
 
-            if (!_settings.Snippets.Any())
-                return _buildEmpty(query);
+            // InnerLogger.Logger.Trace($"Search: {search}");
+
+            // if (!_settings.Snippets.Any())
+            //     return _buildEmpty(query);
 
             // all data
             if (string.IsNullOrEmpty(search))
@@ -33,53 +36,44 @@ namespace Flow.Launcher.Plugin.Snippets
             }
 
             // full match
-            var fullMatch = _settings.Snippets.ContainsKey(search);
-            if (fullMatch)
-            {
-                var value = _settings.Snippets[search];
-                return new List<Result>
-                {
-                    _toResult(query, new KeyValuePair<string, string>(search, value))
-                };
-            }
+            // if (_settings.Snippets.TryGetValue(search, out var fullMatch))
+            // {
+            //     return new List<Result>
+            //     {
+            //         _toResult(query, new KeyValuePair<string, string>(search, fullMatch))
+            //     };
+            // }
 
             // fuzzy search
-            var searchTerms = query.SearchTerms;
-            if (searchTerms.Length < 2)
+
+            var results = new List<Result>();
+            foreach (var kvp in _settings.Snippets)
             {
-                // only first 
-                return _settings.Snippets
-                    .Where(r =>
+                Result result;
+                if (string.IsNullOrEmpty(search))
+                    result = _toResult(query, kvp);
+                else
+                {
+                    var mr = _context.API.FuzzySearch(search, kvp.Key);
+                    if (mr.Success)
                     {
-                        if (string.IsNullOrEmpty(search)) return true;
-                        var mr = _context.API.FuzzySearch(search, r.Key);
-                        return mr.Success;
-                    })
-                    .Select(r => _toResult(query, r))
-                    .ToList();
+                        result = _toResult(query, kvp);
+                        result.Score = mr.Score;
+                    }
+                    else
+                        continue;
+                }
+
+                results.Add(result);
             }
 
-            // eq 2
-            var firstSearchKey = query.FirstSearch;
-            if (_settings.Snippets.TryGetValue(firstSearchKey, out var firstValue))
+            // InnerLogger.Logger.Debug($"FuzzySearch: {search}. results.size: {results.Count}");
+
+            if (!results.Any() && query.SearchTerms.Length >= 2)
             {
-                // update
-                return new List<Result>
-                {
-                    _updateSnippets(query, firstSearchKey, query.SecondToEndSearch)
-                };
+                _appendSnippets(query, results);
             }
 
-            var results = _settings.Snippets
-                .Where(r =>
-                {
-                    if (string.IsNullOrEmpty(firstSearchKey)) return true;
-                    var mr = _context.API.FuzzySearch(firstSearchKey, r.Key);
-                    return mr.Success;
-                })
-                .Select(r => _toResult(query, r))
-                .ToList();
-            results.Add(_appendSnippets(query));
             return results;
         }
 
@@ -105,24 +99,29 @@ namespace Flow.Launcher.Plugin.Snippets
             };
         }
 
-
-        private Result _appendSnippets(Query query)
+        private void _appendSnippets(Query query, List<Result> results)
         {
-            var name = query.FirstSearch;
-            var value = query.SecondToEndSearch;
+            var terms = query.SearchTerms;
+            var length = terms.Length;
 
-            return new Result
+            for (var i = 1; i < length; i++)
             {
-                Title = _context.API.GetTranslation("snippets_plugin_add"),
-                SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_add_info"), name, value),
-                IcoPath = IconPath,
-                Action = c =>
+                var name = string.Join(" ", terms, 0, i);
+                var value = string.Join(" ", terms, i, length - i);
+
+                results.Add(new Result
                 {
-                    _add(name, value);
-                    _context.API.ChangeQuery($"{query.ActionKeyword} {name}", true);
-                    return false;
-                }
-            };
+                    Title = _context.API.GetTranslation("snippets_plugin_add"),
+                    SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_add_info"), name, value),
+                    IcoPath = IconPath,
+                    Action = c =>
+                    {
+                        _add(name, value);
+                        _context.API.ChangeQuery($"{query.ActionKeyword} {name}", true);
+                        return false;
+                    }
+                });
+            }
         }
 
         private Result _updateSnippets(Query query, string name, string value)
