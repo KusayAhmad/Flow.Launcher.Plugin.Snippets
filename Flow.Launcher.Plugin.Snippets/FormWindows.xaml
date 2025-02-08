@@ -78,8 +78,6 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Snippets List-->
-
-
                 <DockPanel>
 
                     <Grid DockPanel.Dock="Top">
@@ -124,8 +122,7 @@
                         HeadersVisibility="Column"
                         GridLinesVisibility="All"
                         SelectionMode="Single"
-                        SelectionChanged="DataGrid_OnSelectionChanged"
-                        ItemsSource="{Binding KeyValuePairs}">
+                        SelectionChanged="DataGrid_OnSelectionChanged">
 
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="1*">
@@ -136,7 +133,7 @@
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Key}" VerticalAlignment="Center"
+                                        <TextBlock Text="{Binding [0]}" VerticalAlignment="Center"
                                                    Margin="5 0 0 0" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -150,7 +147,7 @@
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Value}" VerticalAlignment="Center"
+                                        <TextBlock Text="{Binding [1]}" VerticalAlignment="Center"
                                                    MaxHeight="64" Margin="5 0 0 0" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

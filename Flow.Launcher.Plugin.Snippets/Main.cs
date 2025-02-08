@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using Flow.Launcher.Plugin.Snippets.Json;
+using Flow.Launcher.Plugin.Snippets.Sqlite;
+using Flow.Launcher.Plugin.Snippets.Util;
 
 namespace Flow.Launcher.Plugin.Snippets
 {
@@ -10,64 +13,36 @@ namespace Flow.Launcher.Plugin.Snippets
 
         private PluginInitContext _context;
         private Settings _settings;
+        private SnippetManage _snippetManage;
 
         public void Init(PluginInitContext context)
         {
             _context = context;
             _settings = _context.API.LoadSettingJsonStorage<Settings>();
 
-            // InnerLogger.SetAsFlowLauncherLogger(context.API, LoggerLevel.TRACE);
+            if (_settings.StorageType == StorageType.JsonSetting)
+            {
+                _snippetManage = new JsonSettingSnippetManage(context);
+            }
+            else
+            {
+                _snippetManage =
+                    new SqliteSnippetManage(FileUtil.GetDataDirectory(true, () => GetType().Assembly.GetName().Name));
+            }
         }
 
         public List<Result> Query(Query query)
         {
             var search = query.Search;
 
-            // InnerLogger.Logger.Trace($"Search: {search}");
-
-            // if (!_settings.Snippets.Any())
-            //     return _buildEmpty(query);
-
             // all data
             if (string.IsNullOrEmpty(search))
             {
-                return _settings.Snippets.Select(r => _toResult(query, r))
-                    .ToList();
+                return _snippetManage.List().Select(sm => _modelToResult(query, sm)).ToList();
             }
-
-            // full match
-            // if (_settings.Snippets.TryGetValue(search, out var fullMatch))
-            // {
-            //     return new List<Result>
-            //     {
-            //         _toResult(query, new KeyValuePair<string, string>(search, fullMatch))
-            //     };
-            // }
 
             // fuzzy search
-
-            var results = new List<Result>();
-            foreach (var kvp in _settings.Snippets)
-            {
-                Result result;
-                if (string.IsNullOrEmpty(search))
-                    result = _toResult(query, kvp);
-                else
-                {
-                    var mr = _context.API.FuzzySearch(search, kvp.Key);
-                    if (mr.Success)
-                    {
-                        result = _toResult(query, kvp);
-                        result.Score = mr.Score;
-                    }
-                    else
-                        continue;
-                }
-
-                results.Add(result);
-            }
-
-            // InnerLogger.Logger.Debug($"FuzzySearch: {search}. results.size: {results.Count}");
+            var results = _snippetManage.List(key: search).Select(sm => _modelToResult(query, sm)).ToList();
 
             if (!results.Any() && query.SearchTerms.Length >= 2)
             {
@@ -77,23 +52,24 @@ namespace Flow.Launcher.Plugin.Snippets
             return results;
         }
 
-        private Result _toResult(Query query, KeyValuePair<string, string> r)
+        private Result _modelToResult(Query query, SnippetModel sm)
         {
             return new Result
             {
-                Title = r.Key,
-                SubTitle = r.Value,
+                Title = sm.Key,
+                SubTitle = sm.Value,
                 IcoPath = IconPath,
-                AutoCompleteText = $"{query.ActionKeyword} {r.Key}",
-                ContextData = r,
+                Score = sm.Score,
+                AutoCompleteText = $"{query.ActionKeyword} {sm.Key}",
+                ContextData = sm,
                 Preview = new Result.PreviewInfo
                 {
-                    Description = r.Value,
+                    Description = sm.Value,
                     PreviewImagePath = IconPath
                 },
                 Action = _ =>
                 {
-                    _context.API.CopyToClipboard(r.Value, showDefaultNotification: false);
+                    _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
                     return true;
                 }
             };
@@ -140,33 +116,39 @@ namespace Flow.Launcher.Plugin.Snippets
             };
         }
 
-        private void _add(string name, string value)
+        private void _add(string key, string value)
         {
-            _settings.Snippets.Add(name, value);
-            _context.API.SavePluginSettings();
+            _snippetManage.Add(new SnippetModel
+            {
+                Key = key,
+                Value = value
+            });
         }
 
-        private void _update(string name, string value)
+        private void _update(string key, string value)
         {
-            _settings.Snippets[name] = value;
-            _context.API.SavePluginSettings();
+            _snippetManage.UpdateByKey(new SnippetModel
+            {
+                Key = key,
+                Value = value
+            });
         }
 
         public List<Result> LoadContextMenus(Result selectedResult)
         {
             var menus = new List<Result>();
             var contextData = selectedResult.ContextData;
-            if (contextData is KeyValuePair<string, string> kvp)
+            if (contextData is SnippetModel sm)
             {
                 menus.Add(new Result
                 {
                     Title = _context.API.GetTranslation("snippets_plugin_edit_snippet"),
                     SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_edit_snippet_info"),
-                        kvp.Key, kvp.Value),
+                        sm.Key, sm.Value),
                     IcoPath = IconPath,
                     Action = _ =>
                     {
-                        var fw = new FormWindows(_context.API, _settings, kvp)
+                        var fw = new FormWindows(_context.API, _snippetManage, sm)
                         {
                             // Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
                             // WindowStartupLocation = WindowStartupLocation.CenterScreen,
@@ -183,12 +165,11 @@ namespace Flow.Launcher.Plugin.Snippets
                 {
                     Title = _context.API.GetTranslation("snippets_plugin_delete_snippet"),
                     SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_delete_snippet_info"),
-                        kvp.Key, kvp.Value),
+                        sm.Key, sm.Value),
                     IcoPath = IconPath,
                     Action = _ =>
                     {
-                        _settings.Snippets.Remove(kvp.Key);
-                        _context.API.SavePluginSettings();
+                        _snippetManage.RemoveByKey(sm.Key);
                         return true;
                     },
                 });
@@ -210,7 +191,7 @@ namespace Flow.Launcher.Plugin.Snippets
 
         public Control CreateSettingPanel()
         {
-            return new SettingPanel(_context.API, _settings);
+            return new SettingPanel(_context.API, _snippetManage);
         }
 
         private List<Result> _buildEmpty(Query query)

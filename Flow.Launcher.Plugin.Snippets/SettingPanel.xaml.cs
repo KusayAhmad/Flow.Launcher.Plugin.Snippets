@@ -6,18 +6,18 @@ namespace Flow.Launcher.Plugin.Snippets;
 public partial class SettingPanel : UserControl
 {
     private IPublicAPI _publicApi;
-    private Settings _settings;
+    private SnippetManage _snippetManage;
 
-    public SettingPanel(IPublicAPI contextApi, Settings settings)
+    public SettingPanel(IPublicAPI contextApi, SnippetManage snippetManage)
     {
         _publicApi = contextApi;
-        _settings = settings;
+        _snippetManage = snippetManage;
         InitializeComponent();
     }
 
     private void ButtonOpenManage_OnClick(object sender, RoutedEventArgs e)
     {
-        var fw = new FormWindows(_publicApi, _settings)
+        var fw = new FormWindows(_publicApi, _snippetManage)
         {
             // Title = _publicApi.GetTranslation("snippets_plugin_manage_snippets"),
             // WindowStartupLocation = WindowStartupLocation.CenterScreen,
