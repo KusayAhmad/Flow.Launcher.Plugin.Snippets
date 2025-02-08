@@ -1,31 +1,74 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.ObjectModel;
+using Flow.Launcher.Plugin.Snippets.Json;
+using Flow.Launcher.Plugin.Snippets.Sqlite;
 
 namespace Flow.Launcher.Plugin.Snippets;
 
 public class Main_Test
 {
+    //TEST 
+    private static string dbPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\snippets.db";
+
     public static void Main()
     {
-        string[] terms = { "s1", "s2", "s3",  }; // 示例数组
-        int length = terms.Length;
+        // test_json_settings();
+        // test_sqlite_add();
+        test_sqlite_query();
+    }
 
-        if (length < 2)
+    private static void test_sqlite_query()
+    {
+        var sm = new SqliteSnippetManage(dbPath);
+
+        var snippetModels = sm.List(key: "key1");
+        foreach (var snippetModel in snippetModels)
         {
-            Console.WriteLine("数组长度至少为2");
-            return;
+            Console.WriteLine(snippetModel + " - " + snippetModel.UpdateTime);
         }
+    }
 
-        StringBuilder result = new StringBuilder();
+    private static void test_sqlite_add()
+    {
+        var sm = new SqliteSnippetManage(dbPath);
 
-        for (int i = 1; i < length; i++)
+        sm.Add(new SnippetModel
         {
-            string left = string.Join("", terms, 0, i);
-            string right = string.Join("", terms, i, length - i);
-            result.AppendLine($"({left}, {right})");
-        }
+            Key = "key1",
+            Value = "value1"
+        });
+        sm.Add(new SnippetModel
+        {
+            Key = "key2",
+            Value = "value2"
+        });
+    }
 
-        Console.WriteLine(result.ToString());
+    private static void test_json_settings()
+    {
+        var snippets = new ObservableCollection<SnippetModel>();
+
+        snippets.Add(new SnippetModel
+        {
+            Key = "key1",
+            Value = "value1"
+        });
+
+        snippets.Add(new SnippetModel
+        {
+            Key = "key2",
+            Value = "value2"
+        });
+
+        snippets.Add(new SnippetModel
+        {
+            Key = "key3",
+            Value = "value3"
+        });
+
+        var sm = new JsonSettingSnippetManage(null);
+        var v1 = sm.GetByKey("key1");
+        Console.WriteLine(v1 == null);
+        Console.WriteLine(v1);
     }
 }
