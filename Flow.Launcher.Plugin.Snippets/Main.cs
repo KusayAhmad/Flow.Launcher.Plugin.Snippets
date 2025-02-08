@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
@@ -7,7 +8,7 @@ using Flow.Launcher.Plugin.Snippets.Util;
 
 namespace Flow.Launcher.Plugin.Snippets
 {
-    public class Snippets : IPlugin, IPluginI18n, IContextMenu, ISettingProvider
+    public class Snippets : IPlugin, IPluginI18n, IContextMenu, ISettingProvider, IDisposable
     {
         public static readonly string IconPath = "Images\\Snippets.png";
 
@@ -20,14 +21,17 @@ namespace Flow.Launcher.Plugin.Snippets
             _context = context;
             _settings = _context.API.LoadSettingJsonStorage<Settings>();
 
-            if (_settings.StorageType == StorageType.JsonSetting)
-            {
-                _snippetManage = new JsonSettingSnippetManage(context);
-            }
-            else
+            InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
+
+            if (_settings.StorageType == StorageType.Sqlite)
             {
                 _snippetManage =
                     new SqliteSnippetManage(FileUtil.GetDataDirectory(true, () => GetType().Assembly.GetName().Name));
+            }
+            else
+            {
+                _snippetManage = new JsonSettingSnippetManage(context);
+                _mergeOldSnippet(); // merge old snippets
             }
         }
 
@@ -57,7 +61,7 @@ namespace Flow.Launcher.Plugin.Snippets
             return new Result
             {
                 Title = sm.Key,
-                SubTitle = sm.Value,
+                SubTitle = sm.Value.Replace("\r\n", "  ").Replace("\n", "  "),
                 IcoPath = IconPath,
                 Score = sm.Score,
                 AutoCompleteText = $"{query.ActionKeyword} {sm.Key}",
@@ -191,7 +195,12 @@ namespace Flow.Launcher.Plugin.Snippets
 
         public Control CreateSettingPanel()
         {
-            return new SettingPanel(_context.API, _snippetManage);
+            return new SettingPanel(_context.API, _settings, _snippetManage);
+        }
+
+        public void Dispose()
+        {
+            _snippetManage.Close();
         }
 
         private List<Result> _buildEmpty(Query query)
@@ -206,6 +215,31 @@ namespace Flow.Launcher.Plugin.Snippets
                     AutoCompleteText = $"{query.ActionKeyword} "
                 }
             };
+        }
+
+
+        /// <summary>
+        /// 1.x.x version snippets merge to 2.x.x version
+        /// </summary>
+        [Obsolete]
+        private void _mergeOldSnippet()
+        {
+            // old version snippets in Settings.json
+            var snippets = _settings.Snippets;
+            if (snippets == null || !snippets.Any()) return;
+
+            foreach (var snippet in snippets)
+            {
+                _snippetManage.Add(new SnippetModel
+                {
+                    Key = snippet.Key,
+                    Value = snippet.Value
+                });
+            }
+
+            // clear old snippets after merge
+            _settings.Snippets = null;
+            _context.API.SavePluginSettings();
         }
     }
 }

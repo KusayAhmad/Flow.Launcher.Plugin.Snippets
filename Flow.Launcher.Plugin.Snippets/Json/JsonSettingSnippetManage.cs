@@ -72,7 +72,10 @@ public class JsonSettingSnippetManage : SnippetManage
         var get = GetByKey(sm.Key);
         if (get != null)
         {
-            return false;
+            get.Value = sm.Value;
+            get.UpdateTime = DateTime.Now;
+            get.Score = sm.Score;
+            return true;
         }
 
         sm.UpdateTime = DateTime.Now;
@@ -106,5 +109,6 @@ public class JsonSettingSnippetManage : SnippetManage
     public void Clear()
     {
         _snippets.Clear();
+        _context.API.SavePluginSettings();
     }
 }

@@ -11,6 +11,8 @@
     <system:String x:Key="snippets_plugin_snippets_empty_add">Snippet is empty, Please add Snippet first</system:String>
     <system:String x:Key="snippets_plugin_add">Add Snippet</system:String>
     <system:String x:Key="snippets_plugin_add_info">Add Snippet. {0} = {1}</system:String>
+    <system:String x:Key="snippets_plugin_add_failed">Add Snippet Failed</system:String>
+    <system:String x:Key="snippets_plugin_add_failed_cause">Snippet Key Already exist</system:String>
     <system:String x:Key="snippets_plugin_update">Update Snippet</system:String>
     <system:String x:Key="snippets_plugin_update_info">Update Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_edit_snippet">Edit Snippet</system:String>
@@ -27,5 +29,13 @@
     <system:String x:Key="snippets_plugin_snippets_value">Value</system:String>
     <system:String x:Key="snippets_plugin_filter">Filter</system:String>
     <system:String x:Key="snippets_plugin_reset">Reset</system:String>
+    <system:String x:Key="snippets_plugin_export">Export</system:String>
+    <system:String x:Key="snippets_plugin_import">Import</system:String>
+    <system:String x:Key="snippets_plugin_clear">Clear All Data</system:String>
+    <system:String x:Key="snippets_plugin_storage_mode">Storage Mode(Need Restart App)</system:String>
+    <system:String x:Key="snippets_plugin_restart_app">Restart App</system:String>
+    <system:String x:Key="snippets_plugin_storage_json_setting">Json Setting, Simple, Light(Default)</system:String>
+    <system:String x:Key="snippets_plugin_storage_sqlite">Sqlite, Large Data</system:String>
+    <system:String x:Key="snippets_plugin_select_json_file">Select Json File</system:String>
 
 </ResourceDictionary>

@@ -104,7 +104,7 @@ public class SqliteSnippetManage : SnippetManage
     public bool Add(SnippetModel sm)
     {
         const string sql =
-            $"insert into {TABLE_NAME} (key, value, score, update_time) values (@key, @value, @score, @update_time)";
+            $"replace into {TABLE_NAME} (key, value, score, update_time) values (@key, @value, @score, @update_time)";
         using var connection = new SQLiteConnection(_connectionString);
         connection.Open();
         using var command = new SQLiteCommand(sql, connection);

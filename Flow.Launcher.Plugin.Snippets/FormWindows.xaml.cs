@@ -1,25 +1,31 @@
 ﻿using System.Collections.Generic;
-using System.Data;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Flow.Launcher.Plugin.Snippets.Util;
+using JetBrains.Annotations;
 
 namespace Flow.Launcher.Plugin.Snippets;
 
 public partial class FormWindows : Window
 {
     private IPublicAPI _publicAPI;
+
     private SnippetManage _snippetManage;
-    private int _editIndex = -1;
-    private DataTable _dataTable;
+
+    // for edit
+    [CanBeNull] private SnippetModel _selectSm;
+
+    private readonly ObservableCollection<SnippetModel> _snippetsSource = new();
 
     public FormWindows(IPublicAPI publicApi,
         SnippetManage snippetManage,
-        SnippetModel? selectKvp = null)
+        [CanBeNull] SnippetModel selectSm = null)
     {
         _publicAPI = publicApi;
         _snippetManage = snippetManage;
-
 
         InitializeComponent();
 
@@ -37,26 +43,33 @@ public partial class FormWindows : Window
 
         ComboBoxFilterType.SelectedIndex = 0; // default key
 
-        _dataTable = new DataTable();
-        _dataTable.Columns.Add();
-        _dataTable.Columns.Add();
-        DataGrid.ItemsSource = _dataTable.DefaultView;
-
+        DataGrid.ItemsSource = _snippetsSource;
         _loadData();
+        var findIdx = _findBySelectData(selectSm?.Key);
+        if (findIdx != -1)
+            DataGrid.SelectedIndex = findIdx;
+        DataContext = this;
+        AddContextMenu();
+    }
 
-        // _renderSelect();
-        // DataContext = this;
-        // if (_editIndex != -1)
-        // {
-        //     DataGrid.SelectedIndex = _editIndex;
-        // }
-        //
-        // AddContextMenu();
+    private int _findBySelectData([CanBeNull] string findKey)
+    {
+        if (findKey == null) return -1;
+
+        var findIdx = -1;
+        for (var i = 0; i < _snippetsSource.Count; i++)
+        {
+            if (!string.Equals(findKey, _snippetsSource[i].Key)) continue;
+            findIdx = i;
+            break;
+        }
+
+        return findIdx;
     }
 
     private void _loadData()
     {
-        _dataTable.Clear();
+        _snippetsSource.Clear();
 
         List<SnippetModel> snippets;
 
@@ -79,10 +92,7 @@ public partial class FormWindows : Window
 
         foreach (var snippet in snippets)
         {
-            var row = _dataTable.NewRow();
-            row[0] = snippet.Key;
-            row[1] = snippet.Value;
-            _dataTable.Rows.Add(row);
+            _snippetsSource.Add(snippet);
         }
     }
 
@@ -95,11 +105,12 @@ public partial class FormWindows : Window
         deleteItem.Click += (o, args) =>
         {
             var selectedIndex = DataGrid.SelectedIndex;
-            if (selectedIndex == -1) return;
-            if (selectedIndex > _dataTable.Rows.Count) return;
-
-            // var kvp = KeyValuePairs[selectedIndex];
-            // KeyValuePairs.RemoveAt(selectedIndex);
+            if (selectedIndex == -1 || selectedIndex >= _snippetsSource.Count) return;
+            var sm = _snippetsSource[selectedIndex];
+            _snippetsSource.RemoveAt(selectedIndex);
+            _snippetManage.RemoveByKey(sm.Key);
+            _selectSm = null;
+            _renderSelect();
         };
         DataGrid.ContextMenu = new ContextMenu
         {
@@ -110,43 +121,25 @@ public partial class FormWindows : Window
         };
     }
 
-    private int FindEditIndex(KeyValuePair<string, string>? selectKvp)
-    {
-        if (selectKvp == null) return -1;
-
-        var vp = selectKvp.Value;
-
-        // for (var i = 0; i < KeyValuePairs.Count; i++)
-        // {
-        //     var keyValuePair = KeyValuePairs[i];
-        //     if (keyValuePair.Key == vp.Key)
-        //     {
-        //         return i;
-        //     }
-        // }
-
-        return -1;
-    }
-
     private void _renderSelect()
     {
-        /*if (_editIndex != -1)
+        if (_selectSm != null)
         {
             // update
             BtnSwitch.Content = _publicAPI.GetTranslation("snippets_plugin_edit_item_key");
 
-            var keyValuePair = KeyValuePairs[_editIndex];
-            TbKey.Text = keyValuePair.Key;
-            TbValue.Text = keyValuePair.Value;
+            TbKey.IsEnabled = false;
+            TbKey.Text = _selectSm.Key;
+            TbValue.Text = _selectSm.Value;
         }
         else
         {
             // add
             BtnSwitch.Content = _publicAPI.GetTranslation("snippets_plugin_add_item_key");
-
+            TbKey.IsEnabled = true;
             TbKey.Text = "";
             TbValue.Text = "";
-        }*/
+        }
     }
 
     private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
@@ -168,9 +161,19 @@ public partial class FormWindows : Window
             return;
         }
 
-        if (_editIndex == -1)
+        if (_selectSm == null)
         {
             // ADD
+            var sm = _snippetManage.GetByKey(key);
+            if (sm != null)
+            {
+                _publicAPI.ShowMsgError(
+                    _publicAPI.GetTranslation("snippets_plugin_add_failed"),
+                    _publicAPI.GetTranslation("snippets_plugin_add_failed_cause")
+                );
+                return;
+            }
+
             _snippetManage.Add(new SnippetModel
             {
                 Key = key,
@@ -179,49 +182,46 @@ public partial class FormWindows : Window
 
             TbKey.Text = "";
             TbValue.Text = "";
+            _loadData();
         }
         else
         {
-            // update 
-            /*var oldKvp = KeyValuePairs[_editIndex];
-
-            if (string.Equals(key, oldKvp.Key))
+            // update
+            var sm = new SnippetModel
             {
-                // just update value
+                Key = _selectSm.Key,
+                Value = value,
+                Score = _selectSm.Score
+            };
+            _snippetManage.UpdateByKey(sm);
+            var findIdx = _findBySelectData(_selectSm?.Key);
+            if (findIdx != -1)
+            {
+                _snippetsSource[findIdx] = sm;
+                DataGrid.SelectedIndex = findIdx;
             }
-            else
-            {
-                // update key and value
-            }*/
         }
-
-        _loadData();
     }
 
     private void DataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        InnerLogger.Logger.Info($"DataGrid_OnSelectionChanged. {sender.GetType()}");
         if (sender is DataGrid dataGrid)
         {
-            var selectedIndex = dataGrid.SelectedIndex;
+            if (dataGrid.SelectedItem is SnippetModel sm)
+            {
+                _selectSm = sm;
+            }
 
-            if (selectedIndex >= 0 && selectedIndex < dataGrid.Items.Count)
-            {
-                _editIndex = selectedIndex;
-                _renderSelect();
-            }
-            else
-            {
-                _editIndex = -1;
-                _renderSelect();
-            }
+            _renderSelect();
         }
     }
 
     private void ButtonSwitch_OnClick(object sender, RoutedEventArgs e)
     {
-        _editIndex = -1;
-        _renderSelect();
+        _selectSm = null;
         DataGrid.UnselectAll();
+        _renderSelect();
     }
 
 
@@ -230,28 +230,25 @@ public partial class FormWindows : Window
         ComboBoxFilterType.SelectedIndex = 0;
         TbFilter.Text = "";
 
-        _DoFilter();
+        _selectSm = null;
+        DataGrid.UnselectAll();
+        _loadData();
     }
 
     private void ButtonFilter_OnClick(object sender, RoutedEventArgs e)
     {
-        _DoFilter();
+        _selectSm = null;
+        DataGrid.UnselectAll();
+        _loadData();
     }
 
     private void OnTbFilter_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
-            _DoFilter();
+            _selectSm = null;
+            DataGrid.UnselectAll();
+            _loadData();
         }
-    }
-
-    private void _DoFilter()
-    {
-        _editIndex = -1;
-        // _renderSelect();
-        DataGrid.UnselectAll();
-
-        _loadData();
     }
 }

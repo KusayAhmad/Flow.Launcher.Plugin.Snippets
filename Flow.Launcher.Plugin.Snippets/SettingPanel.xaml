@@ -9,8 +9,38 @@
 
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal" Margin="10">
-            <Button Click="ButtonOpenManage_OnClick"
+            <Button Click="ButtonOpenManage_OnClick" Margin="10,0,10,0"
                     Content="{DynamicResource snippets_plugin_manage_snippets}">
+            </Button>
+            <Button Click="ButtonExport_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_export}">
+            </Button>
+            <Button Click="ButtonImport_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_import}">
+            </Button>
+            <Button Click="ButtonClear_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_clear}">
+            </Button>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="10">
+
+            <Label Width="180" VerticalAlignment="Center"
+                   Content="{DynamicResource snippets_plugin_storage_mode}">
+            </Label>
+
+            <RadioButton Name="RadioButtonJsonSetting" Margin="10,0,10,0"
+                         GroupName="StorageMode"
+                         VerticalAlignment="Center" Checked="RadioButtonJsonSetting_OnChecked"
+                         Content="{DynamicResource snippets_plugin_storage_json_setting}">
+            </RadioButton>
+            <RadioButton Name="RadioButtonSqlite" Margin="10,0,10,0"
+                         GroupName="StorageMode"
+                         VerticalAlignment="Center" Checked="RadioButtonSqlite_OnChecked"
+                         Content="{DynamicResource snippets_plugin_storage_sqlite}">
+            </RadioButton>
+            <Button Click="ButtonRestart_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_restart_app}">
             </Button>
         </StackPanel>
     </StackPanel>

@@ -89,7 +89,8 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0">
-                            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Center" Name="ComboBoxFilterType">
+                            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Center" Name="ComboBoxFilterType"
+                                      Width="80">
                                 <ComboBoxItem Content="{DynamicResource snippets_plugin_snippets_key}"></ComboBoxItem>
                                 <ComboBoxItem Content="{DynamicResource snippets_plugin_snippets_value}"></ComboBoxItem>
                             </ComboBox>
@@ -133,7 +134,7 @@
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding [0]}" VerticalAlignment="Center"
+                                        <TextBlock Text="{Binding Key}" VerticalAlignment="Center"
                                                    Margin="5 0 0 0" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -147,7 +148,7 @@
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding [1]}" VerticalAlignment="Center"
+                                        <TextBlock Text="{Binding Value}" VerticalAlignment="Center"
                                                    MaxHeight="64" Margin="5 0 0 0" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -159,6 +160,11 @@
                 <!-- Right Add Or Edit Panel-->
                 <DockPanel Grid.Column="1">
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick"
+                                    Content="{DynamicResource snippets_plugin_add_item_key}" />
+                        </StackPanel>
 
                         <StackPanel Orientation="Vertical" Margin="5">
                             <Label Content="{DynamicResource snippets_plugin_snippets_key}"></Label>
@@ -178,9 +184,6 @@
                             <Button x:Name="BtnSave" Margin="5" Click="ButtonSave_OnClick" />
                         </StackPanel>
 
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                            <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick" />
-                        </StackPanel>
 
                     </StackPanel>
                 </DockPanel>
