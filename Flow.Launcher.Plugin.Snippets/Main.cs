@@ -6,7 +6,7 @@ namespace Flow.Launcher.Plugin.Snippets
 {
     public class Snippets : IPlugin, IPluginI18n, IContextMenu, ISettingProvider
     {
-        public static readonly string IconPath = "Images\\Snippets.png";
+        public static readonly string IconPath = "Images\\Snippet.png";
 
         private PluginInitContext _context;
         private Settings _settings;
