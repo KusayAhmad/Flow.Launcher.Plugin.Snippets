@@ -7,12 +7,22 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
 
-    <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal" Margin="10">
-            <Button Click="ButtonOpenManage_OnClick"
-                    Content="{DynamicResource snippets_plugin_manage_snippets}">
-            </Button>
-        </StackPanel>
-    </StackPanel>
+    <Grid Margin="60,15,0,15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Button
+        Grid.Row="0"
+        Grid.Column="0"
+        Margin="10,5,5,5"
+        VerticalAlignment="Center"
+        Click="ButtonOpenManage_OnClick"
+        Content="{DynamicResource snippets_plugin_manage_snippets}" />
+    </Grid>
 
 </UserControl>
