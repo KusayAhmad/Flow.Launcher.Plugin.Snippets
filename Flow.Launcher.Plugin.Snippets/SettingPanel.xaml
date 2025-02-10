@@ -25,23 +25,20 @@
 
         <StackPanel Orientation="Horizontal" Margin="10">
 
-            <Label Width="180" VerticalAlignment="Center"
+            <Label VerticalAlignment="Center"
                    Content="{DynamicResource snippets_plugin_storage_mode}">
             </Label>
 
-            <RadioButton Name="RadioButtonJsonSetting" Margin="10,0,10,0"
-                         GroupName="StorageMode"
-                         VerticalAlignment="Center" Checked="RadioButtonJsonSetting_OnChecked"
-                         Content="{DynamicResource snippets_plugin_storage_json_setting}">
-            </RadioButton>
-            <RadioButton Name="RadioButtonSqlite" Margin="10,0,10,0"
-                         GroupName="StorageMode"
-                         VerticalAlignment="Center" Checked="RadioButtonSqlite_OnChecked"
-                         Content="{DynamicResource snippets_plugin_storage_sqlite}">
-            </RadioButton>
-            <Button Click="ButtonRestart_OnClick" Margin="10,0,10,0"
-                    Content="{DynamicResource snippets_plugin_restart_app}">
+            <ComboBox Name="ComboBoxStorageMode" Margin="10,0,10,0" Width="300">
+                <ComboBoxItem Content="{DynamicResource snippets_plugin_storage_json_setting}"></ComboBoxItem>
+                <ComboBoxItem Content="{DynamicResource snippets_plugin_storage_sqlite}"></ComboBoxItem>
+            </ComboBox>
+
+            <Button Click="ButtonChangeAndRestart_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_change_and_restart_app}">
             </Button>
+
+
         </StackPanel>
     </StackPanel>
 

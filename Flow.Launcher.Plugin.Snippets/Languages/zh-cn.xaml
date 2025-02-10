@@ -33,9 +33,12 @@
     <system:String x:Key="snippets_plugin_import">导入</system:String>
     <system:String x:Key="snippets_plugin_clear">清空所有数据</system:String>
     <system:String x:Key="snippets_plugin_storage_mode">存储模式(需要重启应用)</system:String>
-    <system:String x:Key="snippets_plugin_restart_app">重启应用</system:String>
+    <system:String x:Key="snippets_plugin_change_and_restart_app">修改并重启应用</system:String>
     <system:String x:Key="snippets_plugin_storage_json_setting">Json 设置,简单,轻量(默认)</system:String>
     <system:String x:Key="snippets_plugin_storage_sqlite">Sqlite,大量数据</system:String>
     <system:String x:Key="snippets_plugin_select_json_file">选择 Json 文件</system:String>
-
+    <system:String x:Key="snippets_plugin_save_json_file">保存 Json 文件</system:String>
+    <system:String x:Key="snippets_plugin_error">错误</system:String>
+    <system:String x:Key="snippets_plugin_file_not_found">文件不存在</system:String>
+    
 </ResourceDictionary>

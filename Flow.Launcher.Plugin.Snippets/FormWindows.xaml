@@ -82,7 +82,7 @@
 
                     <Grid DockPanel.Dock="Top">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="88" />
+                            <ColumnDefinition Width="100" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="64" />
                             <ColumnDefinition Width="64" />

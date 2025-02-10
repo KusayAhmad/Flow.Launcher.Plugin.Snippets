@@ -11,6 +11,24 @@ namespace Flow.Launcher.Plugin.Snippets;
 
 public partial class FormWindows : Window
 {
+    private static FormWindows _instance;
+
+    public static void ShowWindows(IPublicAPI publicApi, SnippetManage snippetManage,
+        [CanBeNull] SnippetModel selectSm = null)
+    {
+        if (_instance == null)
+        {
+            _instance = new FormWindows(publicApi, snippetManage, selectSm);
+            _instance.Show();
+        }
+        else
+        {
+            _instance._selectSm = selectSm;
+            _instance.Activate();
+        }
+    }
+
+
     private IPublicAPI _publicAPI;
 
     private SnippetManage _snippetManage;
@@ -26,9 +44,16 @@ public partial class FormWindows : Window
     {
         _publicAPI = publicApi;
         _snippetManage = snippetManage;
+        _selectSm = selectSm;
 
         InitializeComponent();
 
+        Activated += (sender, args) =>
+        {
+            _reload();
+        };
+
+        Closed += (sender, args) => { _instance = null; };
         PreviewKeyDown += (sender, e) =>
         {
             if (e.Key == Key.Escape)
@@ -44,12 +69,17 @@ public partial class FormWindows : Window
         ComboBoxFilterType.SelectedIndex = 0; // default key
 
         DataGrid.ItemsSource = _snippetsSource;
-        _loadData();
-        var findIdx = _findBySelectData(selectSm?.Key);
-        if (findIdx != -1)
-            DataGrid.SelectedIndex = findIdx;
+
         DataContext = this;
         AddContextMenu();
+    }
+
+    private void _reload()
+    {
+        _loadData();
+        var findIdx = _findBySelectData(_selectSm?.Key);
+        if (findIdx != -1)
+            DataGrid.SelectedIndex = findIdx;
     }
 
     private int _findBySelectData([CanBeNull] string findKey)

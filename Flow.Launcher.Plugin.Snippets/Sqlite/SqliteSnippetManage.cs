@@ -141,7 +141,7 @@ public class SqliteSnippetManage : SnippetManage
 
     public void Clear()
     {
-        const string sql = $"truncate table {TABLE_NAME}";
+        const string sql = $"delete from {TABLE_NAME}";
         using var connection = new SQLiteConnection(_connectionString);
         connection.Open();
         using var command = new SQLiteCommand(sql, connection);

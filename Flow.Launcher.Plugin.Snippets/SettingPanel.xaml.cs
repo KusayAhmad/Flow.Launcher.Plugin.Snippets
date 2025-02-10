@@ -1,6 +1,8 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Flow.Launcher.Plugin.Snippets.Util;
 using Microsoft.Win32;
 
 namespace Flow.Launcher.Plugin.Snippets;
@@ -18,20 +20,13 @@ public partial class SettingPanel : UserControl
         _snippetManage = snippetManage;
         InitializeComponent();
 
-
-        if (_settings.StorageType == StorageType.Sqlite)
-        {
-            RadioButtonSqlite.IsChecked = true;
-        }
-        else
-        {
-            RadioButtonJsonSetting.IsChecked = true;
-        }
+        ComboBoxStorageMode.SelectedIndex = _settings.StorageType == StorageType.Sqlite ? 1 : 0;
     }
 
     private void ButtonOpenManage_OnClick(object sender, RoutedEventArgs e)
     {
-        var fw = new FormWindows(_publicApi, _snippetManage)
+        FormWindows.ShowWindows(_publicApi, _snippetManage);
+        /*var fw = new FormWindows(_publicApi, _snippetManage)
         {
             // Title = _publicApi.GetTranslation("snippets_plugin_manage_snippets"),
             // WindowStartupLocation = WindowStartupLocation.CenterScreen,
@@ -40,19 +35,7 @@ public partial class SettingPanel : UserControl
             // ResizeMode = ResizeMode.NoResize,
             // ShowInTaskbar = false
         };
-        fw.ShowDialog();
-    }
-
-    private void RadioButtonSqlite_OnChecked(object sender, RoutedEventArgs e)
-    {
-        _settings.StorageType = StorageType.Sqlite;
-        _publicApi.SavePluginSettings();
-    }
-
-    private void RadioButtonJsonSetting_OnChecked(object sender, RoutedEventArgs e)
-    {
-        _settings.StorageType = StorageType.JsonSetting;
-        _publicApi.SavePluginSettings();
+        fw.ShowDialog();*/
     }
 
     private void ButtonClear_OnClick(object sender, RoutedEventArgs e)
@@ -70,25 +53,51 @@ public partial class SettingPanel : UserControl
             Multiselect = false
         };
 
-        if (dialog.ShowDialog() == true)
+        if (dialog.ShowDialog() != true) return;
+
+        var file = dialog.FileName;
+
+        if (!File.Exists(file))
         {
-            var file = dialog.FileName;
-            if (File.Exists(file))
-            {
-                // read file
-                var json = File.ReadAllText(file);
-                _snippetManage.Clear();
-            }
+            _publicApi.ShowMsgError(_publicApi.GetTranslation("snippets_plugin_error"),
+                _publicApi.GetTranslation("snippets_plugin_file_not_found"));
+            return;
         }
+
+        Task.Run(() =>
+        {
+            var sms = FileUtil.ReadSnippets(file);
+            foreach (var sm in sms)
+            {
+                _snippetManage.Add(sm);
+            }
+        });
     }
 
     private void ButtonExport_OnClick(object sender, RoutedEventArgs e)
     {
+        var dialog = new SaveFileDialog
+        {
+            Filter = "Json file (*.json)|*.json",
+            Title = _publicApi.GetTranslation("snippets_plugin_save_json_file"),
+            FileName = "snippets.json"
+        };
+        if (dialog.ShowDialog() != true) return;
+        var file = dialog.FileName;
         var list = _snippetManage.List();
+        Task.Run(() => FileUtil.WriteSnippets(file, list));
     }
 
-    private void ButtonRestart_OnClick(object sender, RoutedEventArgs e)
+    private void ButtonChangeAndRestart_OnClick(object sender, RoutedEventArgs e)
     {
-        _publicApi.RestartApp();
+        var mode = ComboBoxStorageMode.SelectedIndex;
+        var storageType = mode == 0 ? StorageType.JsonSetting : StorageType.Sqlite;
+
+        if (storageType != _settings.StorageType)
+        {
+            _settings.StorageType = storageType;
+            _publicApi.SavePluginSettings();
+            _publicApi.RestartApp();
+        }
     }
 }

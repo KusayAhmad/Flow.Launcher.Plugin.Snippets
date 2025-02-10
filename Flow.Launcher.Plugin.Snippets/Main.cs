@@ -152,7 +152,8 @@ namespace Flow.Launcher.Plugin.Snippets
                     IcoPath = IconPath,
                     Action = _ =>
                     {
-                        var fw = new FormWindows(_context.API, _snippetManage, sm)
+                        FormWindows.ShowWindows(_context.API, _snippetManage, sm);
+                        /*var fw = new FormWindows(_context.API, _snippetManage, sm)
                         {
                             // Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
                             // WindowStartupLocation = WindowStartupLocation.CenterScreen,
@@ -161,7 +162,8 @@ namespace Flow.Launcher.Plugin.Snippets
                             // ResizeMode = ResizeMode.NoResize,
                             // ShowInTaskbar = false
                         };
-                        fw.ShowDialog();
+                        fw.ShowDialog();*/
+                        
                         return true;
                     }
                 });
