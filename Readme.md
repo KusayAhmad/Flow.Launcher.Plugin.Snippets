@@ -3,11 +3,14 @@ Flow.Launcher.Plugin.Snippets
 
 A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher).
 
-> `dev` branch support storage mode: `setting.json` or `sqlite database`.
-
 ### Usage
 
     sp <arguments>
+
+### Simple Storage Version
+> only support simple json storage snippets.
+
+- [1.x](https://github.com/yu-xiaoyao/Flow.Launcher.Plugin.Snippets/tree/1.x)
 
 
 ### Storage Type
@@ -38,4 +41,4 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
 
 #### Snippets Manage
 
-![](Resources/setting-manage.jpg)
+![](Resources/setting-manage.png)
