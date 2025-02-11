@@ -32,9 +32,9 @@
     <system:String x:Key="snippets_plugin_export">Export</system:String>
     <system:String x:Key="snippets_plugin_import">Import</system:String>
     <system:String x:Key="snippets_plugin_clear">Clear All Data</system:String>
-    <system:String x:Key="snippets_plugin_storage_mode">Storage Mode(Need Restart App)</system:String>
+    <system:String x:Key="snippets_plugin_storage_mode">Storage Mode</system:String>
     <system:String x:Key="snippets_plugin_change_and_restart_app">Change And Restart App</system:String>
-    <system:String x:Key="snippets_plugin_storage_json_setting">Json Setting, Simple, Light(Default)</system:String>
+    <system:String x:Key="snippets_plugin_storage_json_setting">Json, Simple, Light</system:String>
     <system:String x:Key="snippets_plugin_storage_sqlite">Sqlite, Large Data</system:String>
     <system:String x:Key="snippets_plugin_select_json_file">Select Json File</system:String>
     <system:String x:Key="snippets_plugin_save_json_file">Save Json File</system:String>
