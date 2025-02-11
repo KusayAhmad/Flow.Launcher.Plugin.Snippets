@@ -21,7 +21,7 @@ namespace Flow.Launcher.Plugin.Snippets
             _context = context;
             _settings = _context.API.LoadSettingJsonStorage<Settings>();
 
-            InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
+            // InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
 
             if (_settings.StorageType == StorageType.Sqlite)
             {

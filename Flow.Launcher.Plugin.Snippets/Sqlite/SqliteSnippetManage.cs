@@ -11,7 +11,7 @@ public class SqliteSnippetManage : SnippetManage
 
 
     private const string _tableDDL =
-        $"create table {TABLE_NAME} (key varchar(200) not null primary key , value text not null, score int not null default 0, update_time datetime not null DEFAULT CURRENT_TIMESTAMP)";
+        $"create table {TABLE_NAME} (key varchar(200) not null primary key, value text not null, score int not null default 0, update_time datetime not null DEFAULT CURRENT_TIMESTAMP, create_time datetime not null DEFAULT CURRENT_TIMESTAMP)";
 
     private readonly string _connectionString;
 
