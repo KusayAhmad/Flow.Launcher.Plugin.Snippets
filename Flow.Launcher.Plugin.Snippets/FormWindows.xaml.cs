@@ -1,37 +1,59 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
+using Flow.Launcher.Plugin.Snippets.Util;
+using JetBrains.Annotations;
 
 namespace Flow.Launcher.Plugin.Snippets;
 
 public partial class FormWindows : Window
 {
+    private static FormWindows _instance;
+
+    public static void ShowWindows(IPublicAPI publicApi, SnippetManage snippetManage,
+        [CanBeNull] SnippetModel selectSm = null)
+    {
+        if (_instance == null)
+        {
+            _instance = new FormWindows(publicApi, snippetManage, selectSm);
+            _instance.Show();
+        }
+        else
+        {
+            _instance._selectSm = selectSm;
+            _instance.Activate();
+        }
+    }
+
+
     private IPublicAPI _publicAPI;
-    private Settings _settings;
-    private int _editIndex = -1;
 
-    private ICollectionView _collectionView;
+    private SnippetManage _snippetManage;
 
-    public ObservableCollection<KeyValuePair<string, string>> KeyValuePairs { get; set; }
+    // for edit
+    [CanBeNull] private SnippetModel _selectSm;
 
-    public FormWindows(IPublicAPI publicApi, Settings settings, KeyValuePair<string, string>? selectKvp = null)
+    private readonly ObservableCollection<SnippetModel> _snippetsSource = new();
+
+    public FormWindows(IPublicAPI publicApi,
+        SnippetManage snippetManage,
+        [CanBeNull] SnippetModel selectSm = null)
     {
         _publicAPI = publicApi;
-        _settings = settings;
-
-        // 将 Dictionary 转换为 ObservableCollection
-        KeyValuePairs = new ObservableCollection<KeyValuePair<string, string>>(_settings.Snippets);
-        _editIndex = FindEditIndex(selectKvp);
-
-        _collectionView = CollectionViewSource.GetDefaultView(KeyValuePairs);
+        _snippetManage = snippetManage;
+        _selectSm = selectSm;
 
         InitializeComponent();
 
+        Activated += (sender, args) =>
+        {
+            _reload();
+        };
+
+        Closed += (sender, args) => { _instance = null; };
         PreviewKeyDown += (sender, e) =>
         {
             if (e.Key == Key.Escape)
@@ -45,14 +67,63 @@ public partial class FormWindows : Window
         BtnSave.Content = _publicAPI.GetTranslation("snippets_plugin_save");
 
         ComboBoxFilterType.SelectedIndex = 0; // default key
-        _renderSelect();
+
+        DataGrid.ItemsSource = _snippetsSource;
+
         DataContext = this;
-        if (_editIndex != -1)
+        AddContextMenu();
+    }
+
+    private void _reload()
+    {
+        _loadData();
+        var findIdx = _findBySelectData(_selectSm?.Key);
+        if (findIdx != -1)
+            DataGrid.SelectedIndex = findIdx;
+    }
+
+    private int _findBySelectData([CanBeNull] string findKey)
+    {
+        if (findKey == null) return -1;
+
+        var findIdx = -1;
+        for (var i = 0; i < _snippetsSource.Count; i++)
         {
-            DataGrid.SelectedIndex = _editIndex;
+            if (!string.Equals(findKey, _snippetsSource[i].Key)) continue;
+            findIdx = i;
+            break;
         }
 
-        AddContextMenu();
+        return findIdx;
+    }
+
+    private void _loadData()
+    {
+        _snippetsSource.Clear();
+
+        List<SnippetModel> snippets;
+
+        var filter = TbFilter.Text.Trim();
+        if (string.IsNullOrEmpty(filter))
+        {
+            snippets = _snippetManage.List();
+        }
+        else
+        {
+            if (ComboBoxFilterType.SelectedIndex == 1)
+            {
+                snippets = _snippetManage.List(value: filter);
+            }
+            else
+            {
+                snippets = _snippetManage.List(key: filter);
+            }
+        }
+
+        foreach (var snippet in snippets)
+        {
+            _snippetsSource.Add(snippet);
+        }
     }
 
     private void AddContextMenu()
@@ -64,14 +135,12 @@ public partial class FormWindows : Window
         deleteItem.Click += (o, args) =>
         {
             var selectedIndex = DataGrid.SelectedIndex;
-            if (selectedIndex == -1) return;
-            if (selectedIndex > KeyValuePairs.Count) return;
-
-            var kvp = KeyValuePairs[selectedIndex];
-            KeyValuePairs.RemoveAt(selectedIndex);
-
-            _settings.Snippets.Remove(kvp.Key);
-            _publicAPI.SavePluginSettings();
+            if (selectedIndex == -1 || selectedIndex >= _snippetsSource.Count) return;
+            var sm = _snippetsSource[selectedIndex];
+            _snippetsSource.RemoveAt(selectedIndex);
+            _snippetManage.RemoveByKey(sm.Key);
+            _selectSm = null;
+            _renderSelect();
         };
         DataGrid.ContextMenu = new ContextMenu
         {
@@ -82,40 +151,22 @@ public partial class FormWindows : Window
         };
     }
 
-    private int FindEditIndex(KeyValuePair<string, string>? selectKvp)
-    {
-        if (selectKvp == null) return -1;
-
-        var vp = selectKvp.Value;
-
-        for (var i = 0; i < KeyValuePairs.Count; i++)
-        {
-            var keyValuePair = KeyValuePairs[i];
-            if (keyValuePair.Key == vp.Key)
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     private void _renderSelect()
     {
-        if (_editIndex != -1)
+        if (_selectSm != null)
         {
             // update
             BtnSwitch.Content = _publicAPI.GetTranslation("snippets_plugin_edit_item_key");
 
-            var keyValuePair = KeyValuePairs[_editIndex];
-            TbKey.Text = keyValuePair.Key;
-            TbValue.Text = keyValuePair.Value;
+            TbKey.IsEnabled = false;
+            TbKey.Text = _selectSm.Key;
+            TbValue.Text = _selectSm.Value;
         }
         else
         {
             // add
             BtnSwitch.Content = _publicAPI.GetTranslation("snippets_plugin_add_item_key");
-
+            TbKey.IsEnabled = true;
             TbKey.Text = "";
             TbValue.Text = "";
         }
@@ -140,131 +191,94 @@ public partial class FormWindows : Window
             return;
         }
 
-        if (_editIndex == -1)
+        if (_selectSm == null)
         {
             // ADD
-            KeyValuePairs.Add(new KeyValuePair<string, string>(key, value));
-            _settings.Snippets[key] = value;
-            _publicAPI.SavePluginSettings();
+            var sm = _snippetManage.GetByKey(key);
+            if (sm != null)
+            {
+                _publicAPI.ShowMsgError(
+                    _publicAPI.GetTranslation("snippets_plugin_add_failed"),
+                    _publicAPI.GetTranslation("snippets_plugin_add_failed_cause")
+                );
+                return;
+            }
+
+            _snippetManage.Add(new SnippetModel
+            {
+                Key = key,
+                Value = value
+            });
 
             TbKey.Text = "";
             TbValue.Text = "";
+            _loadData();
         }
         else
         {
-            // update 
-            var oldKvp = KeyValuePairs[_editIndex];
-
-            if (string.Equals(key, oldKvp.Key))
+            // update
+            var sm = new SnippetModel
             {
-                // just update value 
-                _settings.Snippets[key] = value;
-            }
-            else
+                Key = _selectSm.Key,
+                Value = value,
+                Score = _selectSm.Score
+            };
+            _snippetManage.UpdateByKey(sm);
+            var findIdx = _findBySelectData(_selectSm?.Key);
+            if (findIdx != -1)
             {
-                // update key and value
-                _settings.Snippets.Remove(oldKvp.Key);
-                _settings.Snippets[key] = value;
+                _snippetsSource[findIdx] = sm;
+                DataGrid.SelectedIndex = findIdx;
             }
-
-            KeyValuePairs[_editIndex] = new KeyValuePair<string, string>(key, value);
-            _publicAPI.SavePluginSettings();
         }
     }
 
     private void DataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        InnerLogger.Logger.Info($"DataGrid_OnSelectionChanged. {sender.GetType()}");
         if (sender is DataGrid dataGrid)
         {
-            var selectedIndex = dataGrid.SelectedIndex;
+            if (dataGrid.SelectedItem is SnippetModel sm)
+            {
+                _selectSm = sm;
+            }
 
-            if (selectedIndex >= 0 && selectedIndex < dataGrid.Items.Count)
-            {
-                _editIndex = selectedIndex;
-                _renderSelect();
-            }
-            else
-            {
-                _editIndex = -1;
-                _renderSelect();
-            }
+            _renderSelect();
         }
     }
 
     private void ButtonSwitch_OnClick(object sender, RoutedEventArgs e)
     {
-        _editIndex = -1;
-        _renderSelect();
+        _selectSm = null;
         DataGrid.UnselectAll();
+        _renderSelect();
     }
 
 
     private void ButtonReset_OnClick(object sender, RoutedEventArgs e)
     {
-        _editIndex = -1;
-        _renderSelect();
-        DataGrid.UnselectAll();
-
         ComboBoxFilterType.SelectedIndex = 0;
         TbFilter.Text = "";
 
-        _collectionView.Filter = _ => true;
+        _selectSm = null;
+        DataGrid.UnselectAll();
+        _loadData();
     }
 
     private void ButtonFilter_OnClick(object sender, RoutedEventArgs e)
     {
-        _editIndex = -1;
-        _renderSelect();
+        _selectSm = null;
         DataGrid.UnselectAll();
-
-        _DoFilter();
+        _loadData();
     }
 
     private void OnTbFilter_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
-            _DoFilter();
+            _selectSm = null;
+            DataGrid.UnselectAll();
+            _loadData();
         }
-    }
-
-    private void _DoFilter()
-    {
-        var filter = TbFilter.Text.Trim();
-
-        if (string.IsNullOrEmpty(filter))
-        {
-            _collectionView.Filter = _ => true;
-        }
-        else
-        {
-            if (ComboBoxFilterType.SelectedIndex == 1)
-            {
-                _collectionView.Filter = item =>
-                {
-                    if (item is KeyValuePair<string, string> kvp)
-                    {
-                        return kvp.Value.Contains(filter);
-                    }
-
-                    return false;
-                };
-            }
-            else
-            {
-                // filter key
-                _collectionView.Filter = item =>
-                {
-                    if (item is KeyValuePair<string, string> kvp)
-                    {
-                        return kvp.Key.Contains(filter);
-                    }
-
-                    return false;
-                };
-            }
-        }
-
-        _collectionView.Refresh();
     }
 }

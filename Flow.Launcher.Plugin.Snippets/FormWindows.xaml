@@ -78,20 +78,19 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Snippets List-->
-
-
                 <DockPanel>
 
                     <Grid DockPanel.Dock="Top">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="88" />
+                            <ColumnDefinition Width="100" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="64" />
                             <ColumnDefinition Width="64" />
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0">
-                            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Center" Name="ComboBoxFilterType">
+                            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Center" Name="ComboBoxFilterType"
+                                      Width="80">
                                 <ComboBoxItem Content="{DynamicResource snippets_plugin_snippets_key}"></ComboBoxItem>
                                 <ComboBoxItem Content="{DynamicResource snippets_plugin_snippets_value}"></ComboBoxItem>
                             </ComboBox>
@@ -124,8 +123,7 @@
                         HeadersVisibility="Column"
                         GridLinesVisibility="All"
                         SelectionMode="Single"
-                        SelectionChanged="DataGrid_OnSelectionChanged"
-                        ItemsSource="{Binding KeyValuePairs}">
+                        SelectionChanged="DataGrid_OnSelectionChanged">
 
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="1*">
@@ -163,6 +161,11 @@
                 <DockPanel Grid.Column="1">
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
 
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick"
+                                    Content="{DynamicResource snippets_plugin_add_item_key}" />
+                        </StackPanel>
+
                         <StackPanel Orientation="Vertical" Margin="5">
                             <Label Content="{DynamicResource snippets_plugin_snippets_key}"></Label>
                             <TextBox x:Name="TbKey" />
@@ -181,9 +184,6 @@
                             <Button x:Name="BtnSave" Margin="5" Click="ButtonSave_OnClick" />
                         </StackPanel>
 
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                            <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick" />
-                        </StackPanel>
 
                     </StackPanel>
                 </DockPanel>

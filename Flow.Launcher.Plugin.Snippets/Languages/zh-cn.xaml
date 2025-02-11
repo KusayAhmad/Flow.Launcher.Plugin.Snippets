@@ -11,6 +11,8 @@
     <system:String x:Key="snippets_plugin_snippets_empty_add">Snippets 为空, 请先添加 Snippet</system:String>
     <system:String x:Key="snippets_plugin_add">添加 Snippet</system:String>
     <system:String x:Key="snippets_plugin_add_info">添加 Snippet. {0} = {1}</system:String>
+    <system:String x:Key="snippets_plugin_add_failed">添加 Snippet 失败</system:String>
+    <system:String x:Key="snippets_plugin_add_failed_cause">Snippet Key 已存在</system:String>
     <system:String x:Key="snippets_plugin_update">更新 Snippet</system:String>
     <system:String x:Key="snippets_plugin_update_info">更新 Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_edit_snippet">编辑 Snippet</system:String>
@@ -27,5 +29,16 @@
     <system:String x:Key="snippets_plugin_snippets_value">Value</system:String>
     <system:String x:Key="snippets_plugin_filter">过滤</system:String>
     <system:String x:Key="snippets_plugin_reset">重置</system:String>
-
+    <system:String x:Key="snippets_plugin_export">导出</system:String>
+    <system:String x:Key="snippets_plugin_import">导入</system:String>
+    <system:String x:Key="snippets_plugin_clear">清空所有数据</system:String>
+    <system:String x:Key="snippets_plugin_storage_mode">存储模式(需要重启应用)</system:String>
+    <system:String x:Key="snippets_plugin_change_and_restart_app">修改并重启应用</system:String>
+    <system:String x:Key="snippets_plugin_storage_json_setting">Json 设置,简单,轻量(默认)</system:String>
+    <system:String x:Key="snippets_plugin_storage_sqlite">Sqlite,大量数据</system:String>
+    <system:String x:Key="snippets_plugin_select_json_file">选择 Json 文件</system:String>
+    <system:String x:Key="snippets_plugin_save_json_file">保存 Json 文件</system:String>
+    <system:String x:Key="snippets_plugin_error">错误</system:String>
+    <system:String x:Key="snippets_plugin_file_not_found">文件不存在</system:String>
+    
 </ResourceDictionary>
