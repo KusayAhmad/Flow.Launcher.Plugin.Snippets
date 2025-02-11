@@ -29,7 +29,7 @@
                    Content="{DynamicResource snippets_plugin_storage_mode}">
             </Label>
 
-            <ComboBox Name="ComboBoxStorageMode" Margin="10,0,10,0" Width="300" VerticalAlignment="Center">
+            <ComboBox Name="ComboBoxStorageMode" Margin="10,0,10,0" Width="200" VerticalAlignment="Center">
                 <ComboBoxItem Content="{DynamicResource snippets_plugin_storage_json_setting}"></ComboBoxItem>
                 <ComboBoxItem Content="{DynamicResource snippets_plugin_storage_sqlite}"></ComboBoxItem>
             </ComboBox>
