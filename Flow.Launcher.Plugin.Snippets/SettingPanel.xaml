@@ -7,22 +7,38 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
 
-    <Grid Margin="60,15,0,15">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <StackPanel Orientation="Vertical" Margin="60,15,0,15">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10,5,5,5">
+            <Button Click="ButtonOpenManage_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_manage_snippets}">
+            </Button>
+            <Button Click="ButtonExport_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_export}">
+            </Button>
+            <Button Click="ButtonImport_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_import}">
+            </Button>
+            <Button Click="ButtonClear_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_clear}">
+            </Button>
+        </StackPanel>
 
-        <Button
-        Grid.Row="0"
-        Grid.Column="0"
-        Margin="10,5,5,5"
-        VerticalAlignment="Center"
-        Click="ButtonOpenManage_OnClick"
-        Content="{DynamicResource snippets_plugin_manage_snippets}" />
-    </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,5,5,5">
+
+            <Label VerticalAlignment="Center"
+                   Content="{DynamicResource snippets_plugin_storage_mode}">
+            </Label>
+
+            <ComboBox Name="ComboBoxStorageMode" Margin="10,0,10,0" Width="300">
+                <ComboBoxItem Content="{DynamicResource snippets_plugin_storage_json_setting}"></ComboBoxItem>
+                <ComboBoxItem Content="{DynamicResource snippets_plugin_storage_sqlite}"></ComboBoxItem>
+            </ComboBox>
+
+            <Button Click="ButtonChangeAndRestart_OnClick" Margin="10,0,10,0"
+                    Content="{DynamicResource snippets_plugin_change_and_restart_app}">
+            </Button>
+
+        </StackPanel>
+    </StackPanel>
 
 </UserControl>
