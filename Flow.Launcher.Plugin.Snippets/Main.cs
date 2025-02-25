@@ -10,7 +10,7 @@ namespace Flow.Launcher.Plugin.Snippets
 {
     public class Snippets : IPlugin, IPluginI18n, IContextMenu, ISettingProvider, IDisposable
     {
-        public static readonly string IconPath = "Images\\Snippets.png";
+        public static readonly string IconPath = "Images\\Snippet.png";
 
         private PluginInitContext _context;
         private Settings _settings;
@@ -21,7 +21,7 @@ namespace Flow.Launcher.Plugin.Snippets
             _context = context;
             _settings = _context.API.LoadSettingJsonStorage<Settings>();
 
-            InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
+            // InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
 
             if (_settings.StorageType == StorageType.Sqlite)
             {
