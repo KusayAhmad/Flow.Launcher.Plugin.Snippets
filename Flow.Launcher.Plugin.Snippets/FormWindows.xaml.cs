@@ -185,7 +185,7 @@ public partial class FormWindows : Window
     private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
     {
         var key = TbKey.Text.Trim();
-        var value = TbValue.Text.Trim();
+        var value = TbValue.Text;
         if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
         {
             return;
