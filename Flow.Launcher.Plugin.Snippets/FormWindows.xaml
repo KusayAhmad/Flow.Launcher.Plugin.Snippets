@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         mc:Ignorable="d"
         Title="{DynamicResource snippets_plugin_manage_snippets}"
-        Width="980"
+        Width="1200"
         Height="640"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -126,7 +126,8 @@
                         SelectionChanged="DataGrid_OnSelectionChanged">
 
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="1*">
+                            <!-- Key -->
+                            <DataGridTemplateColumn Width="3*">
                                 <DataGridTemplateColumn.Header>
                                     <TextBlock Text="{DynamicResource snippets_plugin_snippets_key}"
                                                HorizontalAlignment="Center" />
@@ -135,12 +136,14 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Key}" VerticalAlignment="Center"
+                                                   ToolTip="{Binding Key}"
                                                    Margin="5 0 0 0" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Width="2*">
+                            <!-- Value -->
+                            <DataGridTemplateColumn Width="6*">
                                 <DataGridTemplateColumn.Header>
                                     <TextBlock Text="{DynamicResource snippets_plugin_snippets_value}"
                                                HorizontalAlignment="Center" />
@@ -153,6 +156,23 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+
+                            <!-- Score -->
+                            <DataGridTemplateColumn Width="1*">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="{DynamicResource snippets_plugin_snippets_score}"
+                                               HorizontalAlignment="Center" />
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Score}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" ToolTip="{Binding Score}"
+                                                   MaxHeight="64" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
@@ -179,11 +199,27 @@
                             </TextBox>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button x:Name="BtnClose" Margin="5" Click="ButtonCancel_OnClick" />
-                            <Button x:Name="BtnSave" Margin="5" Click="ButtonSave_OnClick" />
-                        </StackPanel>
 
+                        <Grid Margin="5">
+                            <DockPanel LastChildFill="False">
+                                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <Label Content="{DynamicResource snippets_plugin_snippets_score}"
+                                           VerticalAlignment="Center" Margin="0 0 5 0">
+                                    </Label>
+                                    <TextBox x:Name="TbScore" Width="180" Text="0"
+                                             PreviewTextInput="TextBox_PreviewTextInput"
+                                             DataObject.Pasting="TextBox_Pasting" />
+                                </StackPanel>
+
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <Button x:Name="BtnClose" DockPanel.Dock="Right" Click="ButtonCancel_OnClick" />
+                                    <Button x:Name="BtnSave" DockPanel.Dock="Right" Click="ButtonSave_OnClick"
+                                            Margin="5 0 0 0" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Grid>
 
                     </StackPanel>
                 </DockPanel>

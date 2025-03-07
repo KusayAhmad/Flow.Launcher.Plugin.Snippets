@@ -38,6 +38,11 @@ public partial class SettingPanel : UserControl
         fw.ShowDialog();*/
     }
 
+    private void ButtonResetScore_OnClick(object sender, RoutedEventArgs e)
+    {
+        _snippetManage.ResetAllScore();
+    }
+
     private void ButtonClear_OnClick(object sender, RoutedEventArgs e)
     {
         _snippetManage.Clear();

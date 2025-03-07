@@ -18,6 +18,9 @@
             <Button Click="ButtonImport_OnClick" Margin="10,0,10,0" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_import}">
             </Button>
+            <Button Click="ButtonResetScore_OnClick" Margin="10,0,10,0" VerticalAlignment="Center"
+                    Content="{DynamicResource snippets_plugin_reset_score}">
+            </Button>   
             <Button Click="ButtonClear_OnClick" Margin="10,0,10,0" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_clear}">
             </Button>

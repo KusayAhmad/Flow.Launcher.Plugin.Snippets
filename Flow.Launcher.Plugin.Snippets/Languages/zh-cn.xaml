@@ -18,6 +18,11 @@
     <system:String x:Key="snippets_plugin_edit_snippet">编辑 Snippet</system:String>
     <system:String x:Key="snippets_plugin_edit_snippet_info">编辑 Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet">删除 Snippet</system:String>
+    <system:String x:Key="snippets_plugin_move_up">上移</system:String>
+    <system:String x:Key="snippets_plugin_move_down">下移</system:String>
+    <system:String x:Key="snippets_plugin_reset_score">重置排序分数</system:String>
+    <system:String x:Key="snippets_plugin_move_top">移到首行</system:String>
+    <system:String x:Key="snippets_plugin_move_bottom">移到最后</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet_info">删除 Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_open_settings">打开设置</system:String>
     <system:String x:Key="snippets_plugin_close">关闭</system:String>
@@ -27,6 +32,7 @@
     <system:String x:Key="snippets_plugin_manage_snippets">管理 Snippets</system:String>
     <system:String x:Key="snippets_plugin_snippets_key">Key</system:String>
     <system:String x:Key="snippets_plugin_snippets_value">Value</system:String>
+    <system:String x:Key="snippets_plugin_snippets_score">Score</system:String>
     <system:String x:Key="snippets_plugin_filter">过滤</system:String>
     <system:String x:Key="snippets_plugin_reset">重置</system:String>
     <system:String x:Key="snippets_plugin_export">导出</system:String>
@@ -40,5 +46,5 @@
     <system:String x:Key="snippets_plugin_save_json_file">保存 Json 文件</system:String>
     <system:String x:Key="snippets_plugin_error">错误</system:String>
     <system:String x:Key="snippets_plugin_file_not_found">文件不存在</system:String>
-    
+
 </ResourceDictionary>

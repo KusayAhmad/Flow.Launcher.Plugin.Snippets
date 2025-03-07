@@ -55,16 +55,21 @@ public class JsonSettingSnippetManage : SnippetManage
     {
         if (key != null && value != null)
         {
-            return _snippets.Where(x => _filter(key, x.Key) && _filter(key, x.Value)).ToList();
+            return _snippets.Where(x => _filter(key, x.Key) && _filter(key, x.Value))
+                .OrderByDescending(x => x.Score)
+                .ToList();
         }
 
         if (key != null)
-            return _snippets.Where(x => _filter(key, x.Key)).ToList();
+            return _snippets.Where(x => _filter(key, x.Key))
+                .OrderByDescending(x => x.Score).ToList();
 
         if (value != null)
-            return _snippets.Where(x => _filter(value, x.Value)).ToList();
+            return _snippets.Where(x => _filter(value, x.Value))
+                .OrderByDescending(x => x.Score).ToList();
 
-        return _snippets.ToList();
+        return _snippets
+            .OrderByDescending(x => x.Score).ToList();
     }
 
     public bool Add(SnippetModel sm)
@@ -102,6 +107,7 @@ public class JsonSettingSnippetManage : SnippetManage
         }
 
         get.Value = sm.Value;
+        get.Score = sm.Score;
         get.UpdateTime = DateTime.Now;
         return true;
     }
@@ -109,6 +115,16 @@ public class JsonSettingSnippetManage : SnippetManage
     public void Clear()
     {
         _snippets.Clear();
+        _context.API.SavePluginSettings();
+    }
+
+    public void ResetAllScore()
+    {
+        foreach (var sm in _snippets)
+        {
+            sm.Score = 0;
+        }
+
         _context.API.SavePluginSettings();
     }
 }

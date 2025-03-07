@@ -21,7 +21,7 @@ namespace Flow.Launcher.Plugin.Snippets
             _context = context;
             _settings = _context.API.LoadSettingJsonStorage<Settings>();
 
-            // InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
+            InnerLogger.SetAsFlowLauncherLogger(_context.API, LoggerLevel.TRACE);
 
             if (_settings.StorageType == StorageType.Sqlite)
             {
@@ -163,7 +163,7 @@ namespace Flow.Launcher.Plugin.Snippets
                             // ShowInTaskbar = false
                         };
                         fw.ShowDialog();*/
-                        
+
                         return true;
                     }
                 });
@@ -176,6 +176,16 @@ namespace Flow.Launcher.Plugin.Snippets
                     Action = _ =>
                     {
                         _snippetManage.RemoveByKey(sm.Key);
+                        return true;
+                    },
+                });
+                menus.Add(new Result
+                {
+                    Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
+                    IcoPath = IconPath,
+                    Action = _ =>
+                    {
+                        FormWindows.ShowWindows(_context.API, _snippetManage);
                         return true;
                     },
                 });

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using Flow.Launcher.Plugin.Snippets.Util;
 
 namespace Flow.Launcher.Plugin.Snippets.Sqlite;
 
@@ -78,6 +79,10 @@ public class SqliteSnippetManage : SnippetManage
             sql += " and value like @value";
         }
 
+        sql += " order by score desc";
+
+        InnerLogger.Logger.Info($"List: {sql}");
+
         using var connection = new SQLiteConnection(_connectionString);
         connection.Open();
         using var command = new SQLiteCommand(sql, connection);
@@ -127,21 +132,43 @@ public class SqliteSnippetManage : SnippetManage
 
     public bool UpdateByKey(SnippetModel sm)
     {
-        const string sql =
-            $"update {TABLE_NAME} set value = @value, score = @score, update_time = @update_time where key = @key";
+        if (sm.Key == null)
+        {
+            return false;
+        }
+
+        var updateSqls = new List<string> { "score = @score" };
+        if (sm.Value != null)
+            updateSqls.Add("value = @value");
+
+        var updateSql = string.Join(", ", updateSqls);
+        var sql = $"update {TABLE_NAME} set {updateSql}, update_time = @update_time where key = @key";
+
+        InnerLogger.Logger.Info($"UpdateByKey: {sql}");
+
         using var connection = new SQLiteConnection(_connectionString);
         connection.Open();
         using var command = new SQLiteCommand(sql, connection);
         command.Parameters.AddWithValue("@key", sm.Key);
-        command.Parameters.AddWithValue("@value", sm.Value);
-        command.Parameters.AddWithValue("@score", sm.Score);
         command.Parameters.AddWithValue("@update_time", sm.UpdateTime ?? DateTime.Now);
+        command.Parameters.AddWithValue("@score", sm.Score);
+        if (sm.Value != null)
+            command.Parameters.AddWithValue("@value", sm.Value);
         return command.ExecuteNonQuery() > 0;
     }
 
     public void Clear()
     {
         const string sql = $"delete from {TABLE_NAME}";
+        using var connection = new SQLiteConnection(_connectionString);
+        connection.Open();
+        using var command = new SQLiteCommand(sql, connection);
+        command.ExecuteNonQuery();
+    }
+
+    public void ResetAllScore()
+    {
+        const string sql = $"update {TABLE_NAME} set score = 0";
         using var connection = new SQLiteConnection(_connectionString);
         connection.Open();
         using var command = new SQLiteCommand(sql, connection);

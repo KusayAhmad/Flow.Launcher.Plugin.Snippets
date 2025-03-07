@@ -18,6 +18,11 @@
     <system:String x:Key="snippets_plugin_edit_snippet">Edit Snippet</system:String>
     <system:String x:Key="snippets_plugin_edit_snippet_info">Edit Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet">Delete Snippet</system:String>
+    <system:String x:Key="snippets_plugin_move_up">Move Up</system:String>
+    <system:String x:Key="snippets_plugin_move_down">Move Down</system:String>
+    <system:String x:Key="snippets_plugin_reset_score">Reset Order Score</system:String>
+    <system:String x:Key="snippets_plugin_move_top">Move Top</system:String>
+    <system:String x:Key="snippets_plugin_move_bottom">Move Bottom</system:String>
     <system:String x:Key="snippets_plugin_delete_snippet_info">Delete Snippet. {0} = {1}</system:String>
     <system:String x:Key="snippets_plugin_open_settings">Open Settings</system:String>
     <system:String x:Key="snippets_plugin_close">Close</system:String>
@@ -27,6 +32,7 @@
     <system:String x:Key="snippets_plugin_manage_snippets">Manage Snippets</system:String>
     <system:String x:Key="snippets_plugin_snippets_key">Key</system:String>
     <system:String x:Key="snippets_plugin_snippets_value">Value</system:String>
+    <system:String x:Key="snippets_plugin_snippets_score">Score</system:String>
     <system:String x:Key="snippets_plugin_filter">Filter</system:String>
     <system:String x:Key="snippets_plugin_reset">Reset</system:String>
     <system:String x:Key="snippets_plugin_export">Export</system:String>

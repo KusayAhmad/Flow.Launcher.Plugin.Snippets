@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -48,10 +47,7 @@ public partial class FormWindows : Window
 
         InitializeComponent();
 
-        Activated += (sender, args) =>
-        {
-            _reload();
-        };
+        Activated += (sender, args) => { _reload(); };
 
         Closed += (sender, args) => { _instance = null; };
         PreviewKeyDown += (sender, e) =>
@@ -142,11 +138,82 @@ public partial class FormWindows : Window
             _selectSm = null;
             _renderSelect();
         };
+
+        /*
+        var moveUp = new MenuItem
+        {
+            Header = _publicAPI.GetTranslation("snippets_plugin_move_up")
+        };
+        moveUp.Click += (o, args) =>
+        {
+            // < 1 ignore first item
+            var selectedIndex = DataGrid.SelectedIndex;
+            if (selectedIndex < 1 || selectedIndex >= _snippetsSource.Count) return;
+
+            var prev = _snippetsSource[selectedIndex - 1];
+            var current = _snippetsSource[selectedIndex];
+            _snippetManage.UpdateByKey(new SnippetModel
+            {
+                Key = current.Key,
+                Score = prev.Score + 1
+            });
+            _loadData();
+        };
+
+        var moveDown = new MenuItem
+        {
+            Header = _publicAPI.GetTranslation("snippets_plugin_move_down")
+        };
+        moveDown.Click += (o, args) =>
+        {
+            // ignore latest item
+            var selectedIndex = DataGrid.SelectedIndex;
+            if (selectedIndex == -1 || selectedIndex >= _snippetsSource.Count - 1) return;
+
+            var current = _snippetsSource[selectedIndex];
+            var next = _snippetsSource[selectedIndex + 1];
+            _snippetManage.UpdateByKey(new SnippetModel
+            {
+                Key = current.Key,
+                Score = next.Score - 1
+            });
+            _loadData();
+        };
+
+        var resetScore = new MenuItem
+        {
+            Header = _publicAPI.GetTranslation("snippets_plugin_reset_score")
+        };
+        resetScore.Click += (o, args) =>
+        {
+            var selectedIndex = DataGrid.SelectedIndex;
+            if (selectedIndex == -1 || selectedIndex >= _snippetsSource.Count) return;
+            var sm = _snippetsSource[selectedIndex];
+            // reset order score
+            _snippetManage.UpdateByKey(new SnippetModel
+            {
+                Key = sm.Key,
+                Score = 0
+            });
+
+            _loadData();
+            var findIdx = _findBySelectData(_selectSm?.Key);
+            if (findIdx != -1)
+            {
+                _snippetsSource[findIdx] = sm;
+                DataGrid.SelectedIndex = findIdx;
+            }
+        };
+        */
+
         DataGrid.ContextMenu = new ContextMenu
         {
             Items =
             {
+                // moveUp,
+                // moveDown,
                 deleteItem,
+                // resetScore
             }
         };
     }
@@ -161,6 +228,7 @@ public partial class FormWindows : Window
             TbKey.IsEnabled = false;
             TbKey.Text = _selectSm.Key;
             TbValue.Text = _selectSm.Value;
+            TbScore.Text = $"{_selectSm.Score}";
         }
         else
         {
@@ -169,6 +237,7 @@ public partial class FormWindows : Window
             TbKey.IsEnabled = true;
             TbKey.Text = "";
             TbValue.Text = "";
+            TbScore.Text = "0";
         }
     }
 
@@ -186,6 +255,10 @@ public partial class FormWindows : Window
     {
         var key = TbKey.Text.Trim();
         var value = TbValue.Text;
+        var scoreResult = int.TryParse(TbScore.Text, out var score);
+        if (!scoreResult)
+            score = 0;
+
         if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
         {
             return;
@@ -207,11 +280,13 @@ public partial class FormWindows : Window
             _snippetManage.Add(new SnippetModel
             {
                 Key = key,
-                Value = value
+                Value = value,
+                Score = score
             });
 
             TbKey.Text = "";
             TbValue.Text = "";
+            TbScore.Text = "0";
             _loadData();
         }
         else
@@ -221,9 +296,11 @@ public partial class FormWindows : Window
             {
                 Key = _selectSm.Key,
                 Value = value,
-                Score = _selectSm.Score
+                Score = score
             };
             _snippetManage.UpdateByKey(sm);
+            _loadData();
+
             var findIdx = _findBySelectData(_selectSm?.Key);
             if (findIdx != -1)
             {
@@ -279,6 +356,48 @@ public partial class FormWindows : Window
             _selectSm = null;
             DataGrid.UnselectAll();
             _loadData();
+        }
+    }
+
+    private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        var input = e.Text.Trim();
+        if (!string.IsNullOrEmpty(input))
+        {
+            if ("-".Equals(input))
+            {
+                return;
+            }
+
+            var isNum = int.TryParse(input, out var score);
+            if (!isNum)
+            {
+                e.Handled = true;
+            }
+        }
+    }
+
+    private void TextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(typeof(string)))
+        {
+            var text = (string)e.DataObject.GetData(typeof(string));
+            if (text != null)
+            {
+                var input = text.Trim();
+                if (!string.IsNullOrEmpty(input))
+                {
+                    var isNum = int.TryParse(input, out var score);
+                    if (!isNum)
+                    {
+                        e.CancelCommand();
+                    }
+                }
+            }
+        }
+        else
+        {
+            e.CancelCommand();
         }
     }
 }

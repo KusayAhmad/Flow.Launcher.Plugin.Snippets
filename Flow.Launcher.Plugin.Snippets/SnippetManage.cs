@@ -18,6 +18,8 @@ public interface SnippetManage
 
     void Clear();
 
+    void ResetAllScore();
+
     void Close()
     {
     }
