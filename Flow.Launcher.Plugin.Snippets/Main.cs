@@ -148,7 +148,7 @@ namespace Flow.Launcher.Plugin.Snippets
                 {
                     Title = _context.API.GetTranslation("snippets_plugin_edit_snippet"),
                     SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_edit_snippet_info"),
-                        sm.Key, sm.Value),
+                        sm.Key, sm.Value.Replace("\r\n", "  ").Replace("\n", "  ")),
                     IcoPath = IconPath,
                     Action = _ =>
                     {
@@ -171,7 +171,7 @@ namespace Flow.Launcher.Plugin.Snippets
                 {
                     Title = _context.API.GetTranslation("snippets_plugin_delete_snippet"),
                     SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_delete_snippet_info"),
-                        sm.Key, sm.Value),
+                        sm.Key, sm.Value.Replace("\r\n", "  ").Replace("\n", "  ")),
                     IcoPath = IconPath,
                     Action = _ =>
                     {
