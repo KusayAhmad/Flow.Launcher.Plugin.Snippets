@@ -153,17 +153,6 @@ namespace Flow.Launcher.Plugin.Snippets
                     Action = _ =>
                     {
                         FormWindows.ShowWindows(_context.API, _snippetManage, sm);
-                        /*var fw = new FormWindows(_context.API, _snippetManage, sm)
-                        {
-                            // Title = _context.API.GetTranslation("snippets_plugin_manage_snippets"),
-                            // WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                            Topmost = true,
-                            // WindowState = WindowState.Normal,
-                            // ResizeMode = ResizeMode.NoResize,
-                            // ShowInTaskbar = false
-                        };
-                        fw.ShowDialog();*/
-
                         return true;
                     }
                 });
@@ -176,6 +165,32 @@ namespace Flow.Launcher.Plugin.Snippets
                     Action = _ =>
                     {
                         _snippetManage.RemoveByKey(sm.Key);
+                        return true;
+                    },
+                });
+
+                // new edit
+                menus.Add(new Result
+                {
+                    //  Title = _context.API.GetTranslation("snippets_plugin_edit_snippet"),
+                    Title = "Test Edit",
+                    SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_edit_snippet_info"),
+                        sm.Key, sm.Value.Replace("\r\n", "  ").Replace("\n", "  ")),
+                    IcoPath = IconPath,
+                    Action = _ =>
+                    {
+                        SnippetDialog.ShowWDialog(_context.API, _snippetManage, sm);
+                        return true;
+                    }
+                });
+
+                menus.Add(new Result
+                {
+                    Title = _context.API.GetTranslation("snippets_plugin_add"),
+                    IcoPath = IconPath,
+                    Action = _ =>
+                    {
+                        SnippetDialog.ShowWDialog(_context.API, _snippetManage);
                         return true;
                     },
                 });

@@ -27,6 +27,7 @@
     <system:String x:Key="snippets_plugin_open_settings">Open Settings</system:String>
     <system:String x:Key="snippets_plugin_close">Close</system:String>
     <system:String x:Key="snippets_plugin_save">Save</system:String>
+    <system:String x:Key="snippets_plugin_save_and_close">Save And Close</system:String>
     <system:String x:Key="snippets_plugin_edit_item_key">Current Is Edit Mode, click to switch to Add Mode</system:String>
     <system:String x:Key="snippets_plugin_add_item_key">Current Is Add Mode</system:String>
     <system:String x:Key="snippets_plugin_manage_snippets">Manage Snippets</system:String>

@@ -139,6 +139,18 @@ public partial class FormWindows : Window
             _renderSelect();
         };
 
+        var editItem = new MenuItem
+        {
+            Header = _publicAPI.GetTranslation("snippets_plugin_edit_snippet")
+        };
+        editItem.Click += (o, args) =>
+        {
+            var selectedIndex = DataGrid.SelectedIndex;
+            if (selectedIndex == -1 || selectedIndex >= _snippetsSource.Count) return;
+            var sm = _snippetsSource[selectedIndex];
+            SnippetDialog.ShowWDialog(_publicAPI, _snippetManage, sm);
+        };
+
         /*
         var moveUp = new MenuItem
         {
@@ -213,6 +225,7 @@ public partial class FormWindows : Window
                 // moveUp,
                 // moveDown,
                 deleteItem,
+                editItem,
                 // resetScore
             }
         };
