@@ -172,14 +172,13 @@ namespace Flow.Launcher.Plugin.Snippets
                 // new edit
                 menus.Add(new Result
                 {
-                    //  Title = _context.API.GetTranslation("snippets_plugin_edit_snippet"),
-                    Title = "Test Edit",
+                    Title = _context.API.GetTranslation("snippets_plugin_edit_snippet"),
                     SubTitle = string.Format(_context.API.GetTranslation("snippets_plugin_edit_snippet_info"),
                         sm.Key, sm.Value.Replace("\r\n", "  ").Replace("\n", "  ")),
                     IcoPath = IconPath,
                     Action = _ =>
                     {
-                        SnippetDialog.ShowWDialog(_context.API, _snippetManage, sm);
+                        SnippetDialog.ShowDialog(_context.API, _snippetManage, sm);
                         return true;
                     }
                 });
@@ -190,7 +189,7 @@ namespace Flow.Launcher.Plugin.Snippets
                     IcoPath = IconPath,
                     Action = _ =>
                     {
-                        SnippetDialog.ShowWDialog(_context.API, _snippetManage);
+                        SnippetDialog.ShowDialog(_context.API, _snippetManage);
                         return true;
                     },
                 });

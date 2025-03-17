@@ -108,7 +108,9 @@
                     <Label VerticalAlignment="Center"
                            Margin="0 5 0 0"
                            Content="{DynamicResource snippets_plugin_snippets_score}" />
-                    <TextBox x:Name="TbScore" Width="180" Text="0" Margin="5 5 0 0" />
+                    <TextBox x:Name="TbScore" Width="180" Text="0" Margin="5 5 0 0"
+                             PreviewTextInput="TextBox_PreviewTextInput"
+                             DataObject.Pasting="TextBox_Pasting" />
                 </StackPanel>
 
             </StackPanel>
@@ -127,6 +129,7 @@
                         MinWidth="120"
                         Margin="10,0,5,0"
                         Click="SaveButtonClient"
+                        Visibility="Hidden"
                         Content="{DynamicResource save}" />
                     <Button
                         MinWidth="120"

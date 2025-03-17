@@ -11,17 +11,19 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
 {
     private static SnippetDialog _dialog;
 
-    public static void ShowWDialog(IPublicAPI publicApi, SnippetManage snippetManage,
-        [CanBeNull] SnippetModel selectSm = null)
+    public static void ShowDialog(IPublicAPI publicApi, SnippetManage snippetManage,
+        [CanBeNull] SnippetModel selectSm = null, [CanBeNull] Window parent = null)
     {
         if (_dialog == null)
         {
             _dialog = new SnippetDialog(publicApi, snippetManage, selectSm);
-            _dialog.ShowDialog();
+            if (parent != null) _dialog.Owner = parent;
+            _dialog.Show();
         }
         else
         {
             _dialog._selectSm = selectSm;
+            if (parent != null) _dialog.Owner = parent;
             _dialog.Activate();
         }
     }
@@ -34,9 +36,13 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
     [CanBeNull] private SnippetModel _selectSm;
 
     // public string TitleName { get; set; }
+    public event PropertyChangedEventHandler PropertyChanged;
 
     private string _titleName;
 
+    /// <summary>
+    /// bind for TitleName
+    /// </summary>
     public string TitleName
     {
         get => _titleName;
@@ -45,6 +51,12 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
             _titleName = value;
             OnPropertyChanged(nameof(TitleName));
         }
+    }
+
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public SnippetDialog(IPublicAPI publicApi,
@@ -75,8 +87,6 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
             ? "snippets_plugin_edit_snippet"
             : "snippets_plugin_add");
 
-        InnerLogger.Logger.Info($"TitleName = {TitleName}");
-
         if (_selectSm != null)
         {
             TbKey.IsEnabled = false;
@@ -99,7 +109,7 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
         var value = TbValue.Text;
         var scoreResult = int.TryParse(TbScore.Text, out var score);
         if (!scoreResult)
-            score = 0;
+            score = 0; // make default for save
 
         if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
             return false;
@@ -133,7 +143,9 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
                 Value = value,
                 Score = score
             };
-            return _snippetManage.UpdateByKey(sm);
+            var result = _snippetManage.UpdateByKey(sm);
+
+            return result;
         }
 
         return true;
@@ -143,6 +155,10 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
     {
         if (_doSave())
             Close();
+        else
+        {
+            _publicAPI.ShowMsgError("FAILED");
+        }
     }
 
     private void SaveButtonClient(object sender, RoutedEventArgs e)
@@ -155,18 +171,46 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
         Close();
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        var input = e.Text.Trim();
+        if (!string.IsNullOrEmpty(input))
+        {
+            if ("-".Equals(input))
+            {
+                return;
+            }
+
+            var isNum = int.TryParse(input, out var score);
+            if (!isNum)
+            {
+                e.Handled = true;
+            }
+        }
     }
 
-    // protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-    // {
-    //     if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-    //     field = value;
-    //     OnPropertyChanged(propertyName);
-    //     return true;
-    // }
+    private void TextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(typeof(string)))
+        {
+            var text = (string)e.DataObject.GetData(typeof(string));
+            if (text != null)
+            {
+                var input = text.Trim();
+                if (!string.IsNullOrEmpty(input))
+                {
+                    var isNum = int.TryParse(input, out var score);
+                    if (!isNum)
+                    {
+                        e.CancelCommand();
+                    }
+                }
+            }
+        }
+        else
+        {
+            e.CancelCommand();
+        }
+    }
 }

@@ -148,7 +148,7 @@ public partial class FormWindows : Window
             var selectedIndex = DataGrid.SelectedIndex;
             if (selectedIndex == -1 || selectedIndex >= _snippetsSource.Count) return;
             var sm = _snippetsSource[selectedIndex];
-            SnippetDialog.ShowWDialog(_publicAPI, _snippetManage, sm);
+            SnippetDialog.ShowDialog(_publicAPI, _snippetManage, sm, this);
         };
 
         /*

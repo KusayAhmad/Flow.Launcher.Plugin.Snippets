@@ -8,6 +8,11 @@ public class Settings : BaseModel
     public StorageType StorageType { get; set; } = StorageType.JsonSetting;
 
     /// <summary>
+    /// Enable Folder Mode
+    /// </summary>
+    public bool EnableFolder { get; set; } = false;
+
+    /// <summary>
     /// 1.x.x version snippets
     /// </summary>
     [Obsolete]
