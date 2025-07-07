@@ -9,21 +9,27 @@
 
     <StackPanel Orientation="Vertical" Margin="{StaticResource SettingPanelMargin}">
         <StackPanel Orientation="Horizontal">
+            
             <Button Click="ButtonOpenManage_OnClick" Margin="{StaticResource SettingPanelItemRightTopBottomMargin}" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_manage_snippets}">
             </Button>
+            
             <Button Click="ButtonExport_OnClick" Margin="{StaticResource SettingPanelItemRightTopBottomMargin}" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_export}">
             </Button>
+            
             <Button Click="ButtonImport_OnClick" Margin="{StaticResource SettingPanelItemRightTopBottomMargin}" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_import}">
             </Button>
+            
             <Button Click="ButtonResetScore_OnClick" Margin="{StaticResource SettingPanelItemRightTopBottomMargin}" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_reset_score}">
             </Button>
+            
             <Button Click="ButtonClear_OnClick" Margin="{StaticResource SettingPanelItemTopBottomMargin}" VerticalAlignment="Center"
                     Content="{DynamicResource snippets_plugin_clear}">
             </Button>
+            
         </StackPanel>
 
         <StackPanel Orientation="Horizontal">
