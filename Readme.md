@@ -7,6 +7,14 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
 
     sp <arguments>
 
+
+### Compatibility
+> for old flow launcher 1.9.x version, download this release
+
+- [Release v2.0.4](https://github.com/yu-xiaoyao/Flow.Launcher.Plugin.Snippets/releases/tag/v2.0.4)
+- [flow.launcher-1.9.x](https://github.com/yu-xiaoyao/Flow.Launcher.Plugin.Snippets/tree/flow.launcher-1.9.x)
+
+
 ### Simple Storage Version
 > only support simple json storage snippets.
 

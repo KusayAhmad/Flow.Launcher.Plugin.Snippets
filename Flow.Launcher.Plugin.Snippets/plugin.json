@@ -4,7 +4,7 @@
   "Name": "Snippets",
   "Description": "Manage name/value snippets and copy to clipboard",
   "Author": "yu-xiaoyao",
-  "Version": "2.0.4",
+  "Version": "2.2.0",
   "Language": "csharp",
   "Website": "https://github.com/yu-xiaoyao/Flow.Launcher.Plugin.Snippets",
   "IcoPath": "Images\\Snippets.png",
