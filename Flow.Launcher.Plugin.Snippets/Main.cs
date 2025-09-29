@@ -140,7 +140,7 @@ namespace Flow.Launcher.Plugin.Snippets
         private Result _createVariableHelpResult(Query query, SnippetModel sm, VariableInfo variableInfo)
         {
             var missingVars = string.Join(", ", variableInfo.MissingVariables);
-            var example = string.Join(" ", variableInfo.MissingVariables.Select(v => $"{v}=value"));
+            var example = string.Join(" ", variableInfo.MissingVariables.Select(v => $"{v}="));
             
             return new Result
             {
