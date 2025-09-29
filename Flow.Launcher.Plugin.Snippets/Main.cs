@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using Flow.Launcher.Plugin.Snippets.Json;
 using Flow.Launcher.Plugin.Snippets.Sqlite;
 using Flow.Launcher.Plugin.Snippets.Util;
+using static Flow.Launcher.Plugin.Snippets.Util.VariableHelper;
 
 namespace Flow.Launcher.Plugin.Snippets
 {
@@ -45,9 +46,43 @@ namespace Flow.Launcher.Plugin.Snippets
                 return _snippetManage.List().Select(sm => _modelToResult(query, sm)).ToList();
             }
 
-            // fuzzy search
-            var results = _snippetManage.List(key: search).Select(sm => _modelToResult(query, sm)).ToList();
+            // Parse variable arguments
+            var queryParts = query.SearchTerms;
+            var baseKeyword = queryParts.Length > 0 ? queryParts[0] : "";
+            var variables = VariableHelper.ParseVariableArguments(queryParts, 1);
 
+            // Search in snippets
+            var snippets = _snippetManage.List(key: baseKeyword);
+            var results = new List<Result>();
+
+            // Add results with variable support
+            foreach (var snippet in snippets)
+            {
+                if (VariableHelper.HasVariables(snippet.Value))
+                {
+                    // Snippet contains variables
+                    var variableInfo = VariableHelper.GetVariableInfo(snippet.Value, variables);
+                    
+                    if (variableInfo.HasAllRequiredVariables)
+                    {
+                        // All variables available - create final result
+                        var processedValue = VariableHelper.ReplaceVariables(snippet.Value, variables);
+                        results.Add(_createVariableResult(query, snippet, processedValue, true));
+                    }
+                    else
+                    {
+                        // Missing variables - show help
+                        results.Add(_createVariableHelpResult(query, snippet, variableInfo));
+                    }
+                }
+                else
+                {
+                    // Regular snippet without variables
+                    results.Add(_modelToResult(query, snippet));
+                }
+            }
+
+            // Add option to create new snippet if no results found
             if (!results.Any() && query.SearchTerms.Length >= 2)
             {
                 _appendSnippets(query, results);
@@ -75,6 +110,55 @@ namespace Flow.Launcher.Plugin.Snippets
                 {
                     _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
                     return true;
+                }
+            };
+        }
+
+        private Result _createVariableResult(Query query, SnippetModel sm, string processedValue, bool isProcessed)
+        {
+            return new Result
+            {
+                Title = sm.Key + (isProcessed ? " ✓" : ""),
+                SubTitle = processedValue.Replace("\r\n", "  ").Replace("\n", "  "),
+                IcoPath = IconPath,
+                Score = sm.Score + (isProcessed ? 10 : 0), // Higher priority for processed results
+                AutoCompleteText = $"{query.ActionKeyword} {sm.Key}",
+                ContextData = sm,
+                Preview = new Result.PreviewInfo
+                {
+                    Description = processedValue,
+                    PreviewImagePath = IconPath
+                },
+                Action = _ =>
+                {
+                    _context.API.CopyToClipboard(processedValue, showDefaultNotification: false);
+                    return true;
+                }
+            };
+        }
+
+        private Result _createVariableHelpResult(Query query, SnippetModel sm, VariableInfo variableInfo)
+        {
+            var missingVars = string.Join(", ", variableInfo.MissingVariables);
+            var example = string.Join(" ", variableInfo.MissingVariables.Select(v => $"{v}=value"));
+            
+            return new Result
+            {
+                Title = $"{sm.Key} (requires variables)",
+                SubTitle = $"Required variables: {missingVars}. Example: {query.ActionKeyword} {sm.Key} {example}",
+                IcoPath = IconPath,
+                Score = sm.Score - 5, // Lower priority than completed results
+                AutoCompleteText = $"{query.ActionKeyword} {sm.Key} {example}",
+                ContextData = sm,
+                Preview = new Result.PreviewInfo
+                {
+                    Description = $"Template: {sm.Value}\n\nRequired variables: {missingVars}\n\nExample: {query.ActionKeyword} {sm.Key} {example}",
+                    PreviewImagePath = IconPath
+                },
+                Action = _ =>
+                {
+                    _context.API.ChangeQuery($"{query.ActionKeyword} {sm.Key} {example}", true);
+                    return false;
                 }
             };
         }

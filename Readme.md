@@ -7,6 +7,32 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
 
     sp <arguments>
 
+### Interactive Variables (New Feature)
+
+This plugin now supports interactive variables in snippets, allowing you to create dynamic templates that can be customized at runtime.
+
+#### Basic Usage
+```
+Key: pod down
+Value: kubectl scale deploy {app} -n {namespace} --replicas=0
+
+Usage: sp pod down app=frontend namespace=production
+Result: kubectl scale deploy frontend -n production --replicas=0
+```
+
+#### Features
+- **Variable Syntax**: Use `{variable_name}` in your snippet values
+- **Runtime Values**: Pass values using `variable=value` format
+- **Auto-completion**: Missing variables show helpful suggestions
+- **Backward Compatible**: Existing snippets continue to work unchanged
+
+#### Examples
+- Database connections: `mysql -h {host} -u {user} -p{password} {database}`
+- File operations: `cp {source} {destination}`
+- Kubernetes commands: `kubectl get pods -n {namespace} -l app={app}`
+
+For detailed documentation, see [VARIABLES_GUIDE.md](VARIABLES_GUIDE.md)
+
 
 ### Compatibility
 > for old flow launcher 1.9.x version, download this release
