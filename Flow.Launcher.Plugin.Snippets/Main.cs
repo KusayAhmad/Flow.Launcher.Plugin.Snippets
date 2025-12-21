@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 using Flow.Launcher.Plugin.Snippets.Json;
 using Flow.Launcher.Plugin.Snippets.Sqlite;
 using Flow.Launcher.Plugin.Snippets.Util;
@@ -73,7 +76,19 @@ namespace Flow.Launcher.Plugin.Snippets
                 },
                 Action = _ =>
                 {
-                    _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
+                    try
+                    {
+                        // copy to clipboard first
+                        _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
+
+                        // after Flow Launcher hides, wait until Flow Launcher no longer has focus and paste into previous active window
+                        Task.Run(() => PasteWhenFocusRestoredAsync());
+                    }
+                    catch (Exception ex)
+                    {
+                         InnerLogger.Logger.Error("Snippets Action", ex);
+                    }
+
                     return true;
                 }
             };
@@ -227,6 +242,63 @@ namespace Flow.Launcher.Plugin.Snippets
         public void Dispose()
         {
             _snippetManage.Close();
+        }
+
+        
+        // P/Invoke helpers to simulate Ctrl+V keypress and check foreground window
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        private const uint KEYEVENTF_KEYUP = 0x0002;
+        private const byte VK_CONTROL = 0x11;
+        private const byte VK_V = 0x56;
+
+        private static void SendCtrlV()
+        {
+            keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+            keybd_event(VK_V, 0, 0, UIntPtr.Zero);
+            keybd_event(VK_V, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+
+        private static async Task PasteWhenFocusRestoredAsync()
+        {
+            try
+            {
+                var currentPid = Process.GetCurrentProcess().Id;
+                const int timeoutMs = 2000; // max wait time for focus to switch
+                const int intervalMs = 100;
+                var waited = 0;
+
+                while (waited < timeoutMs)
+                {
+                    var hwnd = GetForegroundWindow();
+                    if (hwnd == IntPtr.Zero) break;
+
+                    GetWindowThreadProcessId(hwnd, out var pidUint);
+                    var pid = (int)pidUint;
+
+                    if (pid != currentPid)
+                        break; // focus moved away from Flow Launcher
+
+                    await Task.Delay(intervalMs).ConfigureAwait(false);
+                    waited += intervalMs;
+                }
+
+                // small extra delay to ensure target window is ready to accept input
+                await Task.Delay(50).ConfigureAwait(false);
+                SendCtrlV();
+            }
+            catch (Exception ex)
+            {
+                InnerLogger.Logger.Error("Snippets Paste", ex);
+            }
         }
 
         private List<Result> _buildEmpty(Query query)
