@@ -8,6 +8,13 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
     sp <arguments>
 
 
+### Features
+- Quick add snippets with `sp key value`
+- Search and manage snippets
+- Auto-paste functionality (optional)
+- Support for both JSON and SQLite storage
+
+
 ### Compatibility
 > for old flow launcher 1.9.x version, download this release
 
@@ -32,6 +39,13 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
 1. export original data
 2. change storage type
 3. import original data
+
+### Settings
+- Storage Type: Choose between JSON (lightweight) or SQLite (for large datasets)
+- Auto-Paste: Enable or disable automatic pasting of snippets after copying to clipboard
+- Paste Delay: Configure the delay (in milliseconds) before pasting
+
+> Note: When changing storage types, data migration is not automatic. Follow the migration steps above.
 
 ### Snapshots 
 
