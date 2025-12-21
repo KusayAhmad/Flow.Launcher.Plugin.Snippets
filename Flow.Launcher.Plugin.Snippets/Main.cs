@@ -82,7 +82,10 @@ namespace Flow.Launcher.Plugin.Snippets
                         _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
 
                         // after Flow Launcher hides, wait until Flow Launcher no longer has focus and paste into previous active window
-                        Task.Run(() => PasteWhenFocusRestoredAsync());
+                        if (_settings.AutoPasteEnabled)
+                        {
+                            Task.Run(() => PasteWhenFocusRestoredAsync(_settings.PasteDelayMs));
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -252,8 +255,13 @@ namespace Flow.Launcher.Plugin.Snippets
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
 
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         private const uint KEYEVENTF_KEYUP = 0x0002;
         private const byte VK_CONTROL = 0x11;
@@ -261,13 +269,20 @@ namespace Flow.Launcher.Plugin.Snippets
 
         private static void SendCtrlV()
         {
-            keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-            keybd_event(VK_V, 0, 0, UIntPtr.Zero);
-            keybd_event(VK_V, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            try
+            {
+                keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                keybd_event(VK_V, 0, 0, UIntPtr.Zero);
+                keybd_event(VK_V, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                InnerLogger.Logger.Error("SendCtrlV failed", ex);
+            }
         }
 
-        private static async Task PasteWhenFocusRestoredAsync()
+        private static async Task PasteWhenFocusRestoredAsync(int extraDelayMs = 50)
         {
             try
             {
@@ -292,12 +307,15 @@ namespace Flow.Launcher.Plugin.Snippets
                 }
 
                 // small extra delay to ensure target window is ready to accept input
-                await Task.Delay(50).ConfigureAwait(false);
+                await Task.Delay(extraDelayMs).ConfigureAwait(false);
                 SendCtrlV();
             }
             catch (Exception ex)
             {
                 InnerLogger.Logger.Error("Snippets Paste", ex);
+                
+                // At minimum, the snippet is already in clipboard
+                // Optionally show a notification that auto-paste failed
             }
         }
 

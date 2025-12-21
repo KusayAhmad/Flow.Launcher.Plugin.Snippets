@@ -47,5 +47,7 @@
     <system:String x:Key="snippets_plugin_save_json_file">保存 Json 文件</system:String>
     <system:String x:Key="snippets_plugin_error">错误</system:String>
     <system:String x:Key="snippets_plugin_file_not_found">文件不存在</system:String>
+    <system:String x:Key="snippets_plugin_auto_paste_enabled">启用自动粘贴</system:String>
+    <system:String x:Key="snippets_plugin_auto_paste_description">复制到剪贴板后自动粘贴片段</system:String>
 
 </ResourceDictionary>

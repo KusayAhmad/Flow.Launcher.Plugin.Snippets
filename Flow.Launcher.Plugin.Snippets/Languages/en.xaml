@@ -47,5 +47,7 @@
     <system:String x:Key="snippets_plugin_save_json_file">Save Json File</system:String>
     <system:String x:Key="snippets_plugin_error">Error</system:String>
     <system:String x:Key="snippets_plugin_file_not_found">File Not Found</system:String>
+    <system:String x:Key="snippets_plugin_auto_paste_enabled">Enable Auto Paste</system:String>
+    <system:String x:Key="snippets_plugin_auto_paste_description">Automatically paste snippets after copying to clipboard</system:String>
 
 </ResourceDictionary>
