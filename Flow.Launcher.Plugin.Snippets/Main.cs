@@ -83,9 +83,9 @@ namespace Flow.Launcher.Plugin.Snippets
 
                         // after Flow Launcher hides, wait until Flow Launcher no longer has focus and paste into previous active window
                         if (_settings.AutoPasteEnabled)
-                        {
-                            Task.Run(() => PasteWhenFocusRestoredAsync(_settings.PasteDelayMs));
-                        }
+                           {
+                              Task.Run(() => PasteWhenFocusRestoredAsync(_context, _settings.PasteDelayMs));
+                           }
                     }
                     catch (Exception ex)
                     {
@@ -282,42 +282,34 @@ namespace Flow.Launcher.Plugin.Snippets
             }
         }
 
-        private static async Task PasteWhenFocusRestoredAsync(int extraDelayMs = 50)
-        {
+        private static async Task PasteWhenFocusRestoredAsync(PluginInitContext context, int extraDelayMs = 50)
+         {
             try
             {
-                var currentPid = Process.GetCurrentProcess().Id;
-                const int timeoutMs = 2000; // max wait time for focus to switch
-                const int intervalMs = 100;
-                var waited = 0;
-
-                while (waited < timeoutMs)
-                {
-                    var hwnd = GetForegroundWindow();
-                    if (hwnd == IntPtr.Zero) break;
-
-                    GetWindowThreadProcessId(hwnd, out var pidUint);
-                    var pid = (int)pidUint;
-
-                    if (pid != currentPid)
-                        break; // focus moved away from Flow Launcher
-
-                    await Task.Delay(intervalMs).ConfigureAwait(false);
-                    waited += intervalMs;
+              // Wait until Flow Launcher main window is no longer visible
+              const int timeoutMs = 2000; // max wait time for focus to switch
+              const int intervalMs = 100;
+              var waited = 0;
+                
+              while (waited < timeoutMs && context.API.IsMainWindowVisible())
+               {
+                 await Task.Delay(intervalMs).ConfigureAwait(false);
+                 waited += intervalMs;
                 }
 
-                // small extra delay to ensure target window is ready to accept input
-                await Task.Delay(extraDelayMs).ConfigureAwait(false);
-                SendCtrlV();
+            // small extra delay to ensure target window is ready to accept input
+            await Task.Delay(extraDelayMs).ConfigureAwait(false);
+            SendCtrlV();
+            
             }
-            catch (Exception ex)
-            {
-                InnerLogger.Logger.Error("Snippets Paste", ex);
-                
-                // At minimum, the snippet is already in clipboard
-                // Optionally show a notification that auto-paste failed
-            }
-        }
+             catch (Exception ex)
+              {
+                 InnerLogger.Logger.Error("Snippets Paste", ex);
+               
+                 // At minimum, the snippet is already in clipboard
+                 // Optionally show a notification that auto-paste failed
+             }
+         }
 
         private List<Result> _buildEmpty(Query query)
         {
