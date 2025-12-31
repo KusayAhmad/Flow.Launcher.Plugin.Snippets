@@ -61,17 +61,19 @@ namespace Flow.Launcher.Plugin.Snippets
 
         private Result _modelToResult(Query query, SnippetModel sm)
         {
+            var key = sm.Key ?? string.Empty;
+            var value = sm.Value ?? string.Empty;
             return new Result
             {
-                Title = sm.Key,
-                SubTitle = sm.Value.Replace("\r\n", "  ").Replace("\n", "  "),
+                Title = key,
+                SubTitle = value.Replace("\r\n", "  ").Replace("\n", "  "),
                 IcoPath = IconPath,
                 Score = sm.Score,
-                AutoCompleteText = $"{query.ActionKeyword} {sm.Key}",
+                AutoCompleteText = $"{query.ActionKeyword} {key}",
                 ContextData = sm,
                 Preview = new Result.PreviewInfo
                 {
-                    Description = sm.Value,
+                    Description = value,
                     PreviewImagePath = IconPath
                 },
                 Action = _ =>
@@ -79,13 +81,13 @@ namespace Flow.Launcher.Plugin.Snippets
                     try
                     {
                         // copy to clipboard first
-                        _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
+                        _context.API.CopyToClipboard(value, showDefaultNotification: false);
 
                         // after Flow Launcher hides, wait until Flow Launcher no longer has focus and paste into previous active window
                         if (_settings.AutoPasteEnabled)
-                           {
-                              Task.Run(() => PasteWhenFocusRestoredAsync(_context, _settings.PasteDelayMs));
-                           }
+                        {
+                            Task.Run(() => PasteWhenFocusRestoredAsync(_context, _settings.PasteDelayMs));
+                        }
                     }
                     catch (Exception ex)
                     {
