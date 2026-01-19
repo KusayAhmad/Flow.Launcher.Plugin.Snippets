@@ -325,58 +325,57 @@ namespace Flow.Launcher.Plugin.Snippets
         }
 
         /// <summary>
-        /// Build score information string for display
+        /// Build score information string for display - compact format
         /// </summary>
         private string _buildScoreInfo(SnippetModel sm, int? calculatedScore)
         {
             var parts = new List<string>();
             
-            // Show calculated score
+            // Show score (compact: ⚡score)
             if (calculatedScore.HasValue)
             {
-                parts.Add($"[Score: {calculatedScore.Value}");
-                if (calculatedScore.Value != sm.Score)
-                {
-                    parts.Add($"Base: {sm.Score}");
-                }
-                parts.Add("]");
+                parts.Add($"⚡{calculatedScore.Value}");
             }
-            else
+            else if (sm.Score > 0)
             {
-                parts.Add($"[Score: {sm.Score}]");
+                parts.Add($"⚡{sm.Score}");
             }
             
-            // Show usage count if > 0
+            // Show usage count (compact: ↻count)
             if (sm.UsageCount > 0)
             {
-                parts.Add($"[Used: {sm.UsageCount}x]");
+                parts.Add($"↻{sm.UsageCount}");
             }
             
-            // Show last used time
+            // Show last used time (compact: 🕐time)
             if (sm.LastUsedTime.HasValue)
             {
                 var timeSince = DateTime.Now - sm.LastUsedTime.Value;
                 string timeText;
                 if (timeSince.TotalHours < 1)
                 {
-                    timeText = $"{(int)timeSince.TotalMinutes}m ago";
+                    timeText = $"{(int)timeSince.TotalMinutes}m";
                 }
                 else if (timeSince.TotalDays < 1)
                 {
-                    timeText = $"{(int)timeSince.TotalHours}h ago";
+                    timeText = $"{(int)timeSince.TotalHours}h";
                 }
                 else if (timeSince.TotalDays < 7)
                 {
-                    timeText = $"{(int)timeSince.TotalDays}d ago";
+                    timeText = $"{(int)timeSince.TotalDays}d";
+                }
+                else if (timeSince.TotalDays < 30)
+                {
+                    timeText = $"{(int)(timeSince.TotalDays / 7)}w";
                 }
                 else
                 {
-                    timeText = sm.LastUsedTime.Value.ToString("yyyy-MM-dd");
+                    timeText = $"{(int)(timeSince.TotalDays / 30)}mo";
                 }
-                parts.Add($"[Last: {timeText}]");
+                parts.Add($"🕐{timeText}");
             }
             
-            return string.Join(" ", parts);
+            return parts.Count > 0 ? string.Join(" ", parts) : "";
         }
 
         /// <summary>

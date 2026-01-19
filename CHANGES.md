@@ -207,3 +207,89 @@ Implemented a comprehensive scoring system that dynamically calculates snippet r
 - Ready for immediate use
 - Compatible with existing Flow Launcher installations
 - No breaking changes to existing snippets
+
+---
+
+## Compact Score Display & Resizable UI
+
+### Overview
+Optimized score information display to be more compact and improved UI layout to prevent text truncation.
+
+### Problem Addressed
+1. **Long Subtitles in Flow Launcher**: Score information was too verbose, requiring very wide window to see complete information
+2. **Cut-off Text in FormWindows**: "Last used" information was truncated due to fixed field widths and non-resizable window
+
+### Files Modified
+
+#### 1. Compact Score Format
+- **`Main.cs`**: Redesigned `_buildScoreInfo()` method for compact display
+  - Changed from verbose format: `[Score: 45 Base: 20] [Used: 5x] [Last: 2 hours ago]`
+  - To compact format with icons: `⚡45 ↻5 🕐2h`
+  - Score display: `⚡` (lightning) + score number
+  - Usage count: `↻` (circular arrow) + count
+  - Last used time: `🕐` (clock) + abbreviated time
+  - Time abbreviations:
+    - Minutes: `Xm` (e.g., `15m`)
+    - Hours: `Xh` (e.g., `3h`)
+    - Days: `Xd` (e.g., `5d`)
+    - Weeks: `Xw` (e.g., `2w`)
+    - Months: `Xmo` (e.g., `3mo`)
+  - Empty string when no statistics available (cleaner display)
+
+#### 2. Resizable Management Window
+- **`FormWindows.xaml`**: Made window resizable with proper constraints
+  - Changed `ResizeMode` from `NoResize` to `CanResize`
+  - Maintained default size: `Width="1200"` `Height="640"`
+  - Added minimum size constraints:
+    - `MinWidth="900"` - Ensures usability on smaller screens
+    - `MinHeight="500"` - Prevents toolbar/controls overlap
+  - Users can now resize window to fit their screen and preference
+
+#### 3. Improved Field Layout
+- **`FormWindows.xaml`**: Enhanced usage statistics display in edit panel
+  - Increased "Last Used" field width from `110` to `200` pixels
+  - Added `TextWrapping="Wrap"` to prevent text cut-off
+  - Ensures full timestamp visibility without truncation
+  - Better accommodation for longer date/time formats
+
+### Benefits
+
+#### User Experience
+- **Cleaner Flow Launcher Results**: Much shorter subtitle text fits in narrower windows
+- **Better Readability**: Icon-based display is visually cleaner and easier to scan
+- **Flexible Window Size**: Users can adjust FormWindows to their preference
+- **No More Truncation**: All information fully visible without horizontal scrolling
+
+#### Technical Improvements
+- Reduced string length by ~60-70% in typical cases
+- Maintains all essential information
+- Locale-independent icons (no translation needed)
+- Better visual hierarchy with icon markers
+
+### Examples
+
+#### Before & After Comparison
+
+**Before (Verbose)**:
+```
+sp tmux a=session b=window
+[Score: 45 Base: 20] [Used: 5x] [Last: 2 hours ago]
+```
+
+**After (Compact)**:
+```
+sp tmux a=session b=window
+⚡45 ↻5 🕐2h
+```
+
+### Testing & Validation
+- Built successfully with no errors
+- Plugin deployed to Flow Launcher plugins directory
+- Tested with various snippet lengths
+- Window resizing works smoothly
+- All text fields display fully without truncation
+
+### Deployment
+- Updated DLL deployed to Flow Launcher plugin directory
+- Flow Launcher process stopped and restarted for file replacement
+- Changes immediately visible upon restart

@@ -5,9 +5,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         mc:Ignorable="d"
         Title="{DynamicResource snippets_plugin_manage_snippets}"
-        Width="1200"
+        Width="1400"
         Height="640"
-        ResizeMode="NoResize"
+        MinWidth="1200"
+        MinHeight="600"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource PopuBGColor}"
         Foreground="{DynamicResource PopupTextColor}">
@@ -241,24 +243,24 @@
 
                         <Grid Margin="5">
                             <DockPanel LastChildFill="False">
-                                <StackPanel DockPanel.Dock="Left" Orientation="Vertical" Width="180">
+                                <StackPanel DockPanel.Dock="Left" Orientation="Vertical" Width="260">
                                     <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
                                         <Label Content="{DynamicResource snippets_plugin_snippets_score}"
                                                VerticalAlignment="Center" Width="60">
                                         </Label>
-                                        <TextBox x:Name="TbScore" Width="110" Text="0"
+                                        <TextBox x:Name="TbScore" Width="180" Text="0"
                                                  PreviewTextInput="TextBox_PreviewTextInput"
                                                  DataObject.Pasting="TextBox_Pasting" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
                                         <Label Content="Used:" VerticalAlignment="Center" Width="60" />
-                                        <TextBlock x:Name="TxtUsageCount" Width="110" VerticalAlignment="Center" 
-                                                   Text="0" Padding="5,0,0,0" />
+                                        <TextBlock x:Name="TxtUsageCount" Width="180" VerticalAlignment="Center" 
+                                                   Text="0" Padding="5,0,0,0" TextWrapping="NoWrap" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Last:" VerticalAlignment="Center" Width="60" />
-                                        <TextBlock x:Name="TxtLastUsed" Width="110" VerticalAlignment="Center" 
-                                                   Text="-" Padding="5,0,0,0" />
+                                        <TextBlock x:Name="TxtLastUsed" Width="200" VerticalAlignment="Center" 
+                                                   Text="-" Padding="5,0,0,0" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </StackPanel>
 
