@@ -93,6 +93,7 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
             TbKey.Text = _selectSm.Key;
             TbValue.Text = _selectSm.Value;
             TbScore.Text = $"{_selectSm.Score}";
+            ChkFavorite.IsChecked = _selectSm.IsFavorite;
         }
         else
         {
@@ -100,6 +101,7 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
             TbKey.Text = "";
             TbValue.Text = "";
             TbScore.Text = "0";
+            ChkFavorite.IsChecked = false;
         }
     }
 
@@ -131,7 +133,8 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
             {
                 Key = key,
                 Value = value,
-                Score = score
+                Score = score,
+                IsFavorite = ChkFavorite.IsChecked == true
             });
         }
         else
@@ -141,7 +144,10 @@ public partial class SnippetDialog : Window, INotifyPropertyChanged
             {
                 Key = _selectSm.Key,
                 Value = value,
-                Score = score
+                Score = score,
+                UsageCount = _selectSm.UsageCount,
+                LastUsedTime = _selectSm.LastUsedTime,
+                IsFavorite = ChkFavorite.IsChecked == true
             };
             var result = _snippetManage.UpdateByKey(sm);
 

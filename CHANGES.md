@@ -48,5 +48,162 @@ This document summarizes the changes made to add interactive variables support t
 
 ### Deployment
 - Updated DLL file: `Flow.Launcher.Plugin.Snippets.dll`
+
+---
+
+## Advanced Scoring System & Usage Statistics
+
+### Overview
+Implemented a comprehensive scoring system that dynamically calculates snippet relevance based on multiple factors including match quality, usage frequency, recency, variable completeness, complexity, and user favorites.
+
+### Files Modified
+
+#### 1. Data Model Enhancement
+- **`SnippetModel.cs`**: Extended model with usage tracking and favorites
+  - Added `UsageCount`: Tracks number of times snippet is used
+  - Added `LastUsedTime`: Records timestamp of last usage
+  - Added `IsFavorite`: Boolean flag for user favorites
+  - Updated `ToString()` method to include new properties
+
+#### 2. New Scoring Engine
+- **`Util/ScoreCalculator.cs`**: New comprehensive scoring calculation engine
+  - **Match Quality (0-20 points)**:
+    - Exact match: 20 points
+    - Starts with query: 15 points
+    - Contains query: 10 points
+    - Fuzzy match: 5 points
+  - **Usage Frequency (0-15 points)**:
+    - 10+ uses: 15 points
+    - 5+ uses: 10 points
+    - 1+ uses: 5 points
+  - **Recency Bonus (0-10 points)**:
+    - Within last hour: 10 points
+    - Within last day: 7 points
+    - Within last week: 4 points
+    - Within last month: 2 points
+  - **Variable Completeness (-5 to +10 points)**:
+    - All variables provided: +10 points
+    - Missing variables: -5 points
+  - **Complexity Penalty (0 to -5 points)**:
+    - Based on number of variables (more variables = higher penalty)
+  - **Favorite Boost (+25 points)**:
+    - Marked favorites get significant boost
+
+#### 3. Core Integration
+- **`Main.cs`**: Integrated scoring system into query flow
+  - Updated `Query()` method to calculate enhanced scores using `ScoreCalculator`
+  - Modified `_modelToResult()` to accept and display enhanced scores
+  - Added `_buildScoreInfo()` helper to format score breakdown information
+  - Implemented `_updateUsageStats()` to automatically track usage
+  - Updated result subtitles to show:
+    - Calculated score with base score
+    - Usage count (e.g., "Used: 5x")
+    - Last used time (human-readable format like "Last: 2 hours ago")
+  - Added ⭐ marker for favorite snippets in titles
+  - Added ✓ marker for completed variable assignments
+  - Updated `_createVariableResult()` and `_createVariableHelpResult()` for consistency
+
+#### 4. Persistence Layer Updates
+- **`Json/JsonSettingSnippetManage.cs`**: JSON storage enhancements
+  - Updated `Add()` method to preserve usage statistics
+  - Updated `UpdateByKey()` to maintain UsageCount, LastUsedTime, and IsFavorite
+  - Added `ResetAllScore()` method to clear scores and usage stats (preserves favorites)
+  
+- **`Sqlite/SqliteSnippetManage.cs`**: SQLite storage enhancements
+  - Extended table schema with new columns:
+    - `usage_count INTEGER DEFAULT 0`
+    - `last_used_time TEXT`
+    - `is_favorite INTEGER DEFAULT 0`
+  - Implemented automatic migration in `_initCheckTable()` to add columns to existing databases
+  - Updated `_readSnippetModel()` to read new columns
+  - Modified `Add()` and `UpdateByKey()` to include new fields
+  - Updated `ResetAllScore()` to clear scores and usage stats
+
+#### 5. UI Enhancements
+- **`SnippetDialog.xaml` & `SnippetDialog.xaml.cs`**: Add/Edit dialog improvements
+  - Added "Add to Favorites" checkbox to snippet creation/editing
+  - Updated save logic to persist `IsFavorite` flag
+  - Preserved usage statistics when updating existing snippets
+  
+- **`FormWindows.xaml` & `FormWindows.xaml.cs`**: Management window improvements
+  - Added `UsageCount` column to DataGrid
+  - Added `Favorite` column with ⭐ visual indicator
+  - Enhanced edit panel with usage statistics display:
+    - `TxtUsageCount`: Shows number of times used
+    - `TxtLastUsed`: Shows human-readable last used time (e.g., "2 hours ago", "Never")
+  - Updated `_renderSelect()` to populate usage information
+  - Preserved usage statistics when saving manual edits
+  - Improved data binding for better responsiveness
+
+#### 6. Context Menu Integration
+- **`Main.cs`**: Added context menu action
+  - "Toggle Favorite" option to quickly mark/unmark snippets as favorites
+  - Updates IsFavorite flag and persists change immediately
+
+### Features Added
+
+#### Dynamic Scoring
+- Multi-factor relevance calculation combining 6 different scoring components
+- Automatic score adjustment based on user behavior
+- Real-time score updates as snippets are used
+- Transparent score breakdown visible in search results
+
+#### Usage Tracking
+- Automatic increment of usage count on each snippet execution
+- Timestamp recording for recency calculations
+- Persistent storage across sessions
+- No manual intervention required
+
+#### Favorites System
+- User-controlled favorite marking
+- Significant score boost for favorites (+25 points)
+- Visual ⭐ indicator in search results and management UI
+- Quick toggle via context menu
+
+#### Enhanced Search Results
+- Detailed subtitle showing:
+  - Score breakdown: `[Score: X Base: Y]`
+  - Usage statistics: `[Used: Nx]`
+  - Recency information: `[Last: X ago]`
+- Visual indicators (⭐ for favorites, ✓ for completed variables)
+- Better result ordering based on comprehensive scoring
+
+#### Management UI Improvements
+- Usage statistics visible in snippet list
+- Favorite column with star indicator
+- Edit panel displays usage count and last used time
+- Manual score editing capability preserved
+- Automatic preservation of statistics during edits
+
+### Technical Implementation
+
+#### Migration & Backward Compatibility
+- Automatic SQLite schema migration for existing databases
+- Safe column addition without data loss
+- Default values for new fields ensure compatibility
+- JSON storage automatically accommodates new properties
+
+#### Code Quality
+- Centralized scoring logic in dedicated `ScoreCalculator` class
+- Separation of concerns between calculation and presentation
+- Comprehensive helper methods for score component calculations
+- Maintainable and testable architecture
+
+#### Error Handling
+- Safe handling of nullable timestamps
+- Graceful degradation when statistics are unavailable
+- Proper default values for new installations
+
+### Testing & Validation
+- Built successfully with Debug and Release configurations
+- Published to Flow Launcher plugin directory
+- All existing functionality preserved
+- New features tested and operational
+- No breaking changes to existing snippets
+
+### Deployment
+- Updated plugin DLL deployed to `%APPDATA%\FlowLauncher\Plugins\Snippets-2.2.0\`
+- Flow Launcher process managed for successful file replacement
+- Ready for immediate use
 - Compatible with existing Flow Launcher installations
 - No breaking changes to existing snippets

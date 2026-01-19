@@ -55,30 +55,42 @@ namespace Flow.Launcher.Plugin.Snippets
             var snippets = _snippetManage.List(key: baseKeyword);
             var results = new List<Result>();
 
-            // Add results with variable support
+            // Add results with variable support and enhanced scoring
             foreach (var snippet in snippets)
             {
                 if (VariableHelper.HasVariables(snippet.Value))
                 {
                     // Snippet contains variables
                     var variableInfo = VariableHelper.GetVariableInfo(snippet.Value, variables);
+                    int variableCount = variableInfo.RequiredVariables.Count;
+                    bool allProvided = variableInfo.HasAllRequiredVariables;
                     
-                    if (variableInfo.HasAllRequiredVariables)
+                    // Calculate enhanced score
+                    int enhancedScore = ScoreCalculator.CalculateScore(
+                        snippet, 
+                        baseKeyword, 
+                        hasVariables: true,
+                        variableCount: variableCount,
+                        allVariablesProvided: allProvided
+                    );
+                    
+                    if (allProvided)
                     {
                         // All variables available - create final result
                         var processedValue = VariableHelper.ReplaceVariables(snippet.Value, variables);
-                        results.Add(_createVariableResult(query, snippet, processedValue, true));
+                        results.Add(_createVariableResult(query, snippet, processedValue, true, enhancedScore));
                     }
                     else
                     {
                         // Missing variables - show help
-                        results.Add(_createVariableHelpResult(query, snippet, variableInfo));
+                        results.Add(_createVariableHelpResult(query, snippet, variableInfo, enhancedScore));
                     }
                 }
                 else
                 {
-                    // Regular snippet without variables
-                    results.Add(_modelToResult(query, snippet));
+                    // Regular snippet without variables - calculate enhanced score
+                    int enhancedScore = ScoreCalculator.CalculateScore(snippet, baseKeyword);
+                    results.Add(_modelToResult(query, snippet, enhancedScore));
                 }
             }
 
@@ -91,14 +103,15 @@ namespace Flow.Launcher.Plugin.Snippets
             return results;
         }
 
-        private Result _modelToResult(Query query, SnippetModel sm)
+        private Result _modelToResult(Query query, SnippetModel sm, int? enhancedScore = null)
         {
+            var scoreInfo = _buildScoreInfo(sm, enhancedScore);
             return new Result
             {
-                Title = sm.Key,
-                SubTitle = sm.Value.Replace("\r\n", "  ").Replace("\n", "  "),
+                Title = sm.Key + (sm.IsFavorite ? " ⭐" : ""),
+                SubTitle = $"{sm.Value.Replace("\r\n", "  ").Replace("\n", "  ")} {scoreInfo}",
                 IcoPath = IconPath,
-                Score = sm.Score,
+                Score = enhancedScore ?? sm.Score,
                 AutoCompleteText = $"{query.ActionKeyword} {sm.Key}",
                 ContextData = sm,
                 Preview = new Result.PreviewInfo
@@ -109,19 +122,21 @@ namespace Flow.Launcher.Plugin.Snippets
                 Action = _ =>
                 {
                     _context.API.CopyToClipboard(sm.Value, showDefaultNotification: false);
+                    _updateUsageStats(sm);
                     return true;
                 }
             };
         }
 
-        private Result _createVariableResult(Query query, SnippetModel sm, string processedValue, bool isProcessed)
+        private Result _createVariableResult(Query query, SnippetModel sm, string processedValue, bool isProcessed, int enhancedScore)
         {
+            var scoreInfo = _buildScoreInfo(sm, enhancedScore);
             return new Result
             {
-                Title = sm.Key + (isProcessed ? " ✓" : ""),
-                SubTitle = processedValue.Replace("\r\n", "  ").Replace("\n", "  "),
+                Title = sm.Key + (isProcessed ? " ✓" : "") + (sm.IsFavorite ? " ⭐" : ""),
+                SubTitle = $"{processedValue.Replace("\r\n", "  ").Replace("\n", "  ")} {scoreInfo}",
                 IcoPath = IconPath,
-                Score = sm.Score + (isProcessed ? 10 : 0), // Higher priority for processed results
+                Score = enhancedScore,
                 AutoCompleteText = $"{query.ActionKeyword} {sm.Key}",
                 ContextData = sm,
                 Preview = new Result.PreviewInfo
@@ -132,22 +147,23 @@ namespace Flow.Launcher.Plugin.Snippets
                 Action = _ =>
                 {
                     _context.API.CopyToClipboard(processedValue, showDefaultNotification: false);
+                    _updateUsageStats(sm);
                     return true;
                 }
             };
         }
 
-        private Result _createVariableHelpResult(Query query, SnippetModel sm, VariableInfo variableInfo)
+        private Result _createVariableHelpResult(Query query, SnippetModel sm, VariableInfo variableInfo, int enhancedScore)
         {
             var missingVars = string.Join(", ", variableInfo.MissingVariables);
             var example = string.Join(" ", variableInfo.MissingVariables.Select(v => $"{v}="));
             
             return new Result
             {
-                Title = $"{sm.Key} (requires variables)",
+                Title = $"{sm.Key} (requires variables)" + (sm.IsFavorite ? " ⭐" : ""),
                 SubTitle = $"Required variables: {missingVars}. Example: {query.ActionKeyword} {sm.Key} {example}",
                 IcoPath = IconPath,
-                Score = sm.Score - 5, // Lower priority than completed results
+                Score = enhancedScore,
                 AutoCompleteText = $"{query.ActionKeyword} {sm.Key} {example}",
                 ContextData = sm,
                 Preview = new Result.PreviewInfo
@@ -253,6 +269,22 @@ namespace Flow.Launcher.Plugin.Snippets
                     },
                 });
 
+                // Toggle favorite
+                menus.Add(new Result
+                {
+                    Title = sm.IsFavorite ? "Remove from Favorites ⭐" : "Add to Favorites ☆",
+                    SubTitle = sm.IsFavorite 
+                        ? "Remove this snippet from your favorites" 
+                        : "Mark this snippet as favorite for higher priority",
+                    IcoPath = IconPath,
+                    Action = _ =>
+                    {
+                        sm.IsFavorite = !sm.IsFavorite;
+                        _snippetManage.UpdateByKey(sm);
+                        return true;
+                    },
+                });
+
                 // new edit
                 menus.Add(new Result
                 {
@@ -290,6 +322,71 @@ namespace Flow.Launcher.Plugin.Snippets
             }
 
             return menus;
+        }
+
+        /// <summary>
+        /// Build score information string for display
+        /// </summary>
+        private string _buildScoreInfo(SnippetModel sm, int? calculatedScore)
+        {
+            var parts = new List<string>();
+            
+            // Show calculated score
+            if (calculatedScore.HasValue)
+            {
+                parts.Add($"[Score: {calculatedScore.Value}");
+                if (calculatedScore.Value != sm.Score)
+                {
+                    parts.Add($"Base: {sm.Score}");
+                }
+                parts.Add("]");
+            }
+            else
+            {
+                parts.Add($"[Score: {sm.Score}]");
+            }
+            
+            // Show usage count if > 0
+            if (sm.UsageCount > 0)
+            {
+                parts.Add($"[Used: {sm.UsageCount}x]");
+            }
+            
+            // Show last used time
+            if (sm.LastUsedTime.HasValue)
+            {
+                var timeSince = DateTime.Now - sm.LastUsedTime.Value;
+                string timeText;
+                if (timeSince.TotalHours < 1)
+                {
+                    timeText = $"{(int)timeSince.TotalMinutes}m ago";
+                }
+                else if (timeSince.TotalDays < 1)
+                {
+                    timeText = $"{(int)timeSince.TotalHours}h ago";
+                }
+                else if (timeSince.TotalDays < 7)
+                {
+                    timeText = $"{(int)timeSince.TotalDays}d ago";
+                }
+                else
+                {
+                    timeText = sm.LastUsedTime.Value.ToString("yyyy-MM-dd");
+                }
+                parts.Add($"[Last: {timeText}]");
+            }
+            
+            return string.Join(" ", parts);
+        }
+
+        /// <summary>
+        /// Update usage statistics when a snippet is used
+        /// </summary>
+        private void _updateUsageStats(SnippetModel snippet)
+        {
+            snippet.UsageCount++;
+            snippet.LastUsedTime = DateTime.Now;
+            _snippetManage.UpdateByKey(snippet);
         }
 
 

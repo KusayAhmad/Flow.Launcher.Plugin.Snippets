@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -242,6 +243,34 @@ public partial class FormWindows : Window
             TbKey.Text = _selectSm.Key;
             TbValue.Text = _selectSm.Value;
             TbScore.Text = $"{_selectSm.Score}";
+            
+            // Show usage statistics
+            TxtUsageCount.Text = $"{_selectSm.UsageCount}x";
+            
+            if (_selectSm.LastUsedTime.HasValue)
+            {
+                var timeSince = DateTime.Now - _selectSm.LastUsedTime.Value;
+                if (timeSince.TotalHours < 1)
+                {
+                    TxtLastUsed.Text = $"{(int)timeSince.TotalMinutes}m ago";
+                }
+                else if (timeSince.TotalDays < 1)
+                {
+                    TxtLastUsed.Text = $"{(int)timeSince.TotalHours}h ago";
+                }
+                else if (timeSince.TotalDays < 7)
+                {
+                    TxtLastUsed.Text = $"{(int)timeSince.TotalDays}d ago";
+                }
+                else
+                {
+                    TxtLastUsed.Text = _selectSm.LastUsedTime.Value.ToString("yyyy-MM-dd HH:mm");
+                }
+            }
+            else
+            {
+                TxtLastUsed.Text = "Never";
+            }
         }
         else
         {
@@ -251,6 +280,8 @@ public partial class FormWindows : Window
             TbKey.Text = "";
             TbValue.Text = "";
             TbScore.Text = "0";
+            TxtUsageCount.Text = "0x";
+            TxtLastUsed.Text = "Never";
         }
     }
 
@@ -304,12 +335,15 @@ public partial class FormWindows : Window
         }
         else
         {
-            // update
+            // update - preserve usage statistics
             var sm = new SnippetModel
             {
                 Key = _selectSm.Key,
                 Value = value,
-                Score = score
+                Score = score,
+                UsageCount = _selectSm.UsageCount,
+                LastUsedTime = _selectSm.LastUsedTime,
+                IsFavorite = _selectSm.IsFavorite
             };
             _snippetManage.UpdateByKey(sm);
             _loadData();

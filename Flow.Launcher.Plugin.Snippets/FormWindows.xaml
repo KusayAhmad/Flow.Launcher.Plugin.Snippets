@@ -173,6 +173,45 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
+                            <!-- Usage Count -->
+                            <DataGridTemplateColumn Width="80">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="Used" HorizontalAlignment="Center" />
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding UsageCount}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" 
+                                                   ToolTip="{Binding UsageCount}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Favorite -->
+                            <DataGridTemplateColumn Width="60">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="★" HorizontalAlignment="Center" />
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="☆" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                            <Setter Property="Text" Value="⭐" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
@@ -202,14 +241,25 @@
 
                         <Grid Margin="5">
                             <DockPanel LastChildFill="False">
-                                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal"
-                                            HorizontalAlignment="Center">
-                                    <Label Content="{DynamicResource snippets_plugin_snippets_score}"
-                                           VerticalAlignment="Center" Margin="0 0 5 0">
-                                    </Label>
-                                    <TextBox x:Name="TbScore" Width="180" Text="0"
-                                             PreviewTextInput="TextBox_PreviewTextInput"
-                                             DataObject.Pasting="TextBox_Pasting" />
+                                <StackPanel DockPanel.Dock="Left" Orientation="Vertical" Width="180">
+                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
+                                        <Label Content="{DynamicResource snippets_plugin_snippets_score}"
+                                               VerticalAlignment="Center" Width="60">
+                                        </Label>
+                                        <TextBox x:Name="TbScore" Width="110" Text="0"
+                                                 PreviewTextInput="TextBox_PreviewTextInput"
+                                                 DataObject.Pasting="TextBox_Pasting" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
+                                        <Label Content="Used:" VerticalAlignment="Center" Width="60" />
+                                        <TextBlock x:Name="TxtUsageCount" Width="110" VerticalAlignment="Center" 
+                                                   Text="0" Padding="5,0,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Last:" VerticalAlignment="Center" Width="60" />
+                                        <TextBlock x:Name="TxtLastUsed" Width="110" VerticalAlignment="Center" 
+                                                   Text="-" Padding="5,0,0,0" />
+                                    </StackPanel>
                                 </StackPanel>
 
                                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"

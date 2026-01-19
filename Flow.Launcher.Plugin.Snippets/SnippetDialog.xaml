@@ -111,6 +111,11 @@
                     <TextBox x:Name="TbScore" Width="180" Text="0" Margin="5 5 0 0"
                              PreviewTextInput="TextBox_PreviewTextInput"
                              DataObject.Pasting="TextBox_Pasting" />
+                    <CheckBox x:Name="ChkFavorite" 
+                              Content="⭐ Favorite" 
+                              VerticalAlignment="Center" 
+                              Margin="20 5 0 0"
+                              ToolTip="Mark this snippet as favorite for higher priority in search results" />
                 </StackPanel>
 
             </StackPanel>

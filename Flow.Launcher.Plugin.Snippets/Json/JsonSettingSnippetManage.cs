@@ -80,6 +80,9 @@ public class JsonSettingSnippetManage : SnippetManage
             get.Value = sm.Value;
             get.UpdateTime = DateTime.Now;
             get.Score = sm.Score;
+            get.UsageCount = sm.UsageCount;
+            get.LastUsedTime = sm.LastUsedTime;
+            get.IsFavorite = sm.IsFavorite;
             return true;
         }
 
@@ -109,6 +112,9 @@ public class JsonSettingSnippetManage : SnippetManage
         get.Value = sm.Value;
         get.Score = sm.Score;
         get.UpdateTime = DateTime.Now;
+        get.UsageCount = sm.UsageCount;
+        get.LastUsedTime = sm.LastUsedTime;
+        get.IsFavorite = sm.IsFavorite;
         return true;
     }
 
@@ -123,6 +129,9 @@ public class JsonSettingSnippetManage : SnippetManage
         foreach (var sm in _snippets)
         {
             sm.Score = 0;
+            sm.UsageCount = 0;
+            sm.LastUsedTime = null;
+            // Don't reset IsFavorite - users want to keep their favorites
         }
 
         _context.API.SavePluginSettings();
