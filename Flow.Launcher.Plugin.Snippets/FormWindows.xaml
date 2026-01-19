@@ -223,8 +223,8 @@
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
 
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                            <Button x:Name="BtnSwitch" Margin="5" Click="ButtonSwitch_OnClick"
-                                    Content="{DynamicResource snippets_plugin_add_item_key}" />
+                            <Button x:Name="BtnAddNew" Margin="5" Click="ButtonAddNew_OnClick"
+                                    Content="➕ Add New Snippet" FontWeight="SemiBold" />
                         </StackPanel>
 
                         <StackPanel Orientation="Vertical" Margin="5">

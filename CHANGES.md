@@ -1,5 +1,89 @@
 # Changes Summary
 
+## Simplified Add/Edit Interface
+
+### Overview
+Removed confusing "Switch Mode" button and simplified the Add/Edit interface in the Manage Snippets window for better user experience.
+
+### Problem Addressed
+The previous interface had a confusing button that displayed the current mode (e.g., "Current is Edit Mode, click to switch to Add Mode"), which was counterintuitive. Users expected buttons to show what action they would perform, not describe the current state.
+
+### Files Modified
+
+#### 1. User Interface Improvements
+- **`FormWindows.xaml`**: Replaced confusing switch button with clear "➕ Add New Snippet" button
+  - Removed `BtnSwitch` button with ambiguous text
+  - Added `BtnAddNew` button with clear action-oriented label
+  - Button consistently shows "➕ Add New Snippet" regardless of mode
+
+- **`FormWindows.xaml.cs`**: Simplified mode switching logic
+  - Renamed `ButtonSwitch_OnClick` to `ButtonAddNew_OnClick` for clarity
+  - Updated `_renderSelect()` to change Save button text based on context:
+    - Shows "➕ Add Snippet" when adding new snippet
+    - Shows "💾 Save" when editing existing snippet
+  - Added auto-focus on Key field when switching to Add mode
+  - Removed confusing mode indicator text from button
+
+### User Experience Improvements
+
+#### Intuitive Workflow
+1. **Adding New Snippet**:
+   - Click "➕ Add New Snippet" button → clears form and enables Key field
+   - Save button shows "➕ Add Snippet"
+   - Auto-focuses on Key field for immediate typing
+
+2. **Editing Existing Snippet**:
+   - Click on any snippet in the list → loads data automatically
+   - Key field becomes read-only (can't change existing key)
+   - Save button shows "💾 Save"
+   - All editing happens in the same panel
+
+3. **Switching Back to Add Mode**:
+   - Simply click "➕ Add New Snippet" again
+   - Form clears and returns to add mode
+
+#### Visual Clarity
+- **Action-Oriented Labels**: Buttons now describe what will happen when clicked
+- **Contextual Save Button**: Changes between "Add" and "Save" to match context
+- **Icon Indicators**: ➕ for adding, 💾 for saving
+- **No Mode Confusion**: No text describing "current mode"
+
+### Technical Implementation
+
+#### Before (Confusing)
+```
+Button Text: "Current is Add Mode" / "Current is Edit Mode, click to switch to Add Mode"
+Problem: Describes state instead of action
+```
+
+#### After (Clear)
+```
+Top Button: Always shows "➕ Add New Snippet" (action)
+Save Button: Shows "➕ Add Snippet" or "💾 Save" (context-aware)
+Solution: Buttons tell you what they do
+```
+
+### Benefits
+- **Eliminates Confusion**: No more "current mode" language
+- **Faster Workflow**: Clear "Add New" button always visible
+- **Better Discoverability**: New users immediately understand the interface
+- **Consistent Behavior**: Clicking snippets in list automatically switches to edit mode
+- **Professional Feel**: Standard UI pattern used in modern applications
+
+### Testing & Validation
+- Built successfully with no errors
+- Tested add and edit workflows
+- Confirmed button text updates correctly
+- Verified auto-focus on Key field works
+- All existing functionality preserved
+
+### Deployment
+- Updated DLL deployed to Flow Launcher plugin directory
+- Flow Launcher process stopped and restarted for file replacement
+- Changes immediately visible upon restart
+
+---
+
 ## Interactive Variables Enhancement
 
 This document summarizes the changes made to add interactive variables support to the Flow Launcher Snippets plugin.

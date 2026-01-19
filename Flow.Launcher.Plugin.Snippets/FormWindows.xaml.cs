@@ -61,7 +61,7 @@ public partial class FormWindows : Window
 
 
         BtnClose.Content = _publicAPI.GetTranslation("snippets_plugin_close");
-        BtnSave.Content = _publicAPI.GetTranslation("snippets_plugin_save");
+        BtnSave.Content = "➕ Add Snippet"; // Will be updated by _renderSelect()
 
         ComboBoxFilterType.SelectedIndex = 0; // default key
 
@@ -236,9 +236,7 @@ public partial class FormWindows : Window
     {
         if (_selectSm != null)
         {
-            // update
-            BtnSwitch.Content = _publicAPI.GetTranslation("snippets_plugin_edit_item_key");
-
+            // Editing existing snippet
             TbKey.IsEnabled = false;
             TbKey.Text = _selectSm.Key;
             TbValue.Text = _selectSm.Value;
@@ -271,17 +269,22 @@ public partial class FormWindows : Window
             {
                 TxtLastUsed.Text = "Never";
             }
+            
+            // Update button to show we're editing
+            BtnSave.Content = "💾 " + _publicAPI.GetTranslation("snippets_plugin_save");
         }
         else
         {
-            // add
-            BtnSwitch.Content = _publicAPI.GetTranslation("snippets_plugin_add_item_key");
+            // Adding new snippet
             TbKey.IsEnabled = true;
             TbKey.Text = "";
             TbValue.Text = "";
             TbScore.Text = "0";
             TxtUsageCount.Text = "0x";
             TxtLastUsed.Text = "Never";
+            
+            // Update button to show we're adding
+            BtnSave.Content = "➕ Add Snippet";
         }
     }
 
@@ -371,11 +374,15 @@ public partial class FormWindows : Window
         }
     }
 
-    private void ButtonSwitch_OnClick(object sender, RoutedEventArgs e)
+    private void ButtonAddNew_OnClick(object sender, RoutedEventArgs e)
     {
+        // Clear selection and switch to Add mode
         _selectSm = null;
         DataGrid.UnselectAll();
         _renderSelect();
+        
+        // Focus on key field for immediate typing
+        TbKey.Focus();
     }
 
 
