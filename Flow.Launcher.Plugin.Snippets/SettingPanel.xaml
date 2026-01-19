@@ -48,6 +48,14 @@
             </Button>
 
         </WrapPanel>
+        
+        <WrapPanel Orientation="Horizontal">
+            <CheckBox Name="CheckBoxAutoPaste" Content="{DynamicResource snippets_plugin_auto_paste_enabled}" 
+                      Margin="{StaticResource SettingPanelItemRightTopBottomMargin}" 
+                      VerticalAlignment="Center" Checked="CheckBoxAutoPaste_Checked" Unchecked="CheckBoxAutoPaste_Unchecked"/>
+            <Label Content="{DynamicResource snippets_plugin_auto_paste_description}" Margin="{StaticResource SettingPanelItemTopBottomMargin}"
+                   FontStyle="Italic" VerticalAlignment="Center"/>
+        </WrapPanel>
     </StackPanel>
 
 </UserControl>
